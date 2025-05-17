@@ -1,16 +1,17 @@
-from twrate.fetchers.esun import fetch_esun_rates
+import pytest
+
+from twrate.fetcher import fetch_rates
 from twrate.types import Exchange
-from twrate.types import Rate
 
 
-def test_query_sinopac_rates() -> None:
-    rates = fetch_esun_rates()
+@pytest.mark.parametrize("exchange", list(Exchange))
+def test_fetch_rates(exchange: Exchange) -> None:
+    rates = fetch_rates(exchange)
 
     assert isinstance(rates, list)
     assert len(rates) > 0
     for rate in rates:
-        assert isinstance(rate, Rate)
-        assert rate.exchange == Exchange.ESUN
+        assert rate.exchange == exchange
         assert rate.target == "TWD"
         assert rate.symbol == f"{rate.source}/{rate.target}"
 
