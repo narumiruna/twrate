@@ -5,7 +5,7 @@ from twrate.types import Exchange
 from twrate.types import Rate
 
 
-def query_line_rates() -> list[Rate]:
+def fetch_line_rates() -> list[Rate]:
     url = "https://www.linebank.com.tw/board-rate/exchange-rate"
 
     resp = httpx.get(url)

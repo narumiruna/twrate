@@ -1,10 +1,10 @@
-from twrate.line import query_line_rates
+from twrate.line import fetch_line_rates
 from twrate.types import Exchange
 from twrate.types import Rate
 
 
 def test_query_sinopac_rates() -> None:
-    rates = query_line_rates()
+    rates = fetch_line_rates()
 
     assert isinstance(rates, list)
     assert len(rates) > 0

@@ -1,10 +1,10 @@
-from twrate.esun import query_esun_rates
+from twrate.esun import fetch_esun_rates
 from twrate.types import Exchange
 from twrate.types import Rate
 
 
 def test_query_sinopac_rates() -> None:
-    rates = query_esun_rates()
+    rates = fetch_esun_rates()
 
     assert isinstance(rates, list)
     assert len(rates) > 0

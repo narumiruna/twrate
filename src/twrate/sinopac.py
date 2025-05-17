@@ -78,7 +78,7 @@ def merge_rates(*, remit_rates: list[Rate], cash_rates: list[Rate]) -> list[Rate
     return list(result.values())
 
 
-def query_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "all") -> list[Rate]:
+def fetch_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "all") -> list[Rate]:
     """Query SinoPac exchange rates.
 
     Args:
@@ -88,8 +88,8 @@ def query_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "all") 
     """
     if exchange_type == "all":
         return merge_rates(
-            remit_rates=query_sinopac_rates("remit"),
-            cash_rates=query_sinopac_rates("cash"),
+            remit_rates=fetch_sinopac_rates("remit"),
+            cash_rates=fetch_sinopac_rates("cash"),
         )
 
     ts = int(datetime.now().timestamp() * 1000)

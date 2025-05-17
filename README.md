@@ -22,15 +22,15 @@ pip install twrate
 ### Basic Usage
 
 ```python
-from twrate import query_bot_rates  # Bank of Taiwan
-from twrate import query_dbs_rates  # DBS Bank
+from twrate import fetch_bot_rates  # Bank of Taiwan
+from twrate import fetch_dbs_rates  # DBS Bank
 
 # Get exchange rates from Bank of Taiwan
-bot_rates = query_bot_rates()
+bot_rates = fetch_bot_rates()
 print(bot_rates)
 
 # Get exchange rates from DBS Bank
-dbs_rates = query_dbs_rates()
+dbs_rates = fetch_dbs_rates()
 print(dbs_rates)
 ```
 

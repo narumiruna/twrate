@@ -71,7 +71,7 @@ class DBSRateResponse(BaseModel):
         return rates
 
 
-def query_dbs_rates() -> list[Rate]:
+def fetch_dbs_rates() -> list[Rate]:
     url = "https://www.dbs.com.tw/tw-rates-api/v1/api/twrates/latestForexRates"
     resp = httpx.get(url=url)
     resp.raise_for_status()

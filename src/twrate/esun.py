@@ -45,7 +45,7 @@ class EsunRateResponse(BaseModel):
     clear: int = Field(..., validation_alias="Clear")
 
 
-def query_esun_rates() -> list[Rate]:
+def fetch_esun_rates() -> list[Rate]:
     url = "https://www.esunbank.com/api/client/ExchangeRate/LastRateInfo"
 
     resp = httpx.post(url)

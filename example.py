@@ -1,16 +1,18 @@
 from rich import print
 
-from twrate import query_bot_rates
-from twrate import query_dbs_rates
-from twrate import query_esun_rates
-from twrate import query_sinopac_rates
+from twrate import fetch_bot_rates
+from twrate import fetch_dbs_rates
+from twrate import fetch_esun_rates
+from twrate import fetch_line_rates
+from twrate import fetch_sinopac_rates
 
 
 def main() -> None:
-    print(query_esun_rates())
-    print(query_sinopac_rates())
-    print(query_bot_rates())
-    print(query_dbs_rates())
+    print(fetch_line_rates())
+    print(fetch_esun_rates())
+    print(fetch_sinopac_rates())
+    print(fetch_bot_rates())
+    print(fetch_dbs_rates())
 
 
 if __name__ == "__main__":

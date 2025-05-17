@@ -2,11 +2,11 @@ import typer
 from rich import print
 from tabulate import tabulate
 
-from .bot import query_bot_rates
-from .dbs import query_dbs_rates
-from .esun import query_esun_rates
-from .line import query_line_rates
-from .sinopac import query_sinopac_rates
+from .bot import fetch_bot_rates
+from .dbs import fetch_dbs_rates
+from .esun import fetch_esun_rates
+from .line import fetch_line_rates
+from .sinopac import fetch_sinopac_rates
 from .types import Rate
 
 
@@ -17,7 +17,7 @@ def run(source_currency: str) -> None:
         source_currency (str): The source currency to query rates for.
     """
 
-    rates = query_bot_rates() + query_dbs_rates() + query_sinopac_rates() + query_esun_rates() + query_line_rates()
+    rates = fetch_bot_rates() + fetch_dbs_rates() + fetch_sinopac_rates() + fetch_esun_rates() + fetch_line_rates()
 
     # filter rates by source_currency
     rates = [rate for rate in rates if rate.source == source_currency.upper()]

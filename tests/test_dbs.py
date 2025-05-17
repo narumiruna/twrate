@@ -1,10 +1,10 @@
-from twrate.dbs import query_dbs_rates
+from twrate.dbs import fetch_dbs_rates
 from twrate.types import Exchange
 from twrate.types import Rate
 
 
 def test_query_dbs_rate() -> None:
-    rates = query_dbs_rates()
+    rates = fetch_dbs_rates()
 
     assert isinstance(rates, list)
     assert len(rates) > 0

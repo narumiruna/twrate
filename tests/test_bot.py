@@ -1,10 +1,10 @@
-from twrate.bot import query_bot_rates
+from twrate.bot import fetch_bot_rates
 from twrate.types import Exchange
 from twrate.types import Rate
 
 
 def test_query_bot_rates() -> None:
-    rates = query_bot_rates()
+    rates = fetch_bot_rates()
 
     assert isinstance(rates, list)
     assert len(rates) > 0

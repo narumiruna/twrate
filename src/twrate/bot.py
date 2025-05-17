@@ -16,7 +16,7 @@ def check_header(header: str) -> None:
         raise ValueError(f"Unexpected header value, got: {header}")
 
 
-def query_bot_rates() -> list[Rate]:
+def fetch_bot_rates() -> list[Rate]:
     """Query Bank of Taiwan exchange rates.
 
     Returns a list of Rate objects with the exchange rates for various currencies.
