@@ -515,6 +515,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "python-dotenv" },
     { name = "ruff" },
+    { name = "types-python-dateutil" },
     { name = "types-setuptools" },
     { name = "types-tabulate" },
 ]
@@ -539,6 +540,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "ruff", specifier = ">=0.7.3" },
+    { name = "types-python-dateutil", specifier = ">=2.9.0.20250516" },
     { name = "types-setuptools", specifier = ">=80.7.0.20250516" },
     { name = "types-tabulate", specifier = ">=0.9.0.20241207" },
 ]
@@ -556,6 +558,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/6c/89/c527e6c848739be8ceb5c44eb8208c52ea3515c6cf6406aa61932887bf58/typer-0.15.4.tar.gz", hash = "sha256:89507b104f9b6a0730354f27c39fae5b63ccd0c95b1ce1f1a6ba0cfd329997c3", size = 101559 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c9/62/d4ba7afe2096d5659ec3db8b15d8665bdcb92a3c6ff0b95e99895b335a9c/typer-0.15.4-py3-none-any.whl", hash = "sha256:eb0651654dcdea706780c466cf06d8f174405a659ffff8f163cfbfee98c0e173", size = 45258 },
+]
+
+[[package]]
+name = "types-python-dateutil"
+version = "2.9.0.20250516"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/88/d65ed807393285204ab6e2801e5d11fbbea811adcaa979a2ed3b67a5ef41/types_python_dateutil-2.9.0.20250516.tar.gz", hash = "sha256:13e80d6c9c47df23ad773d54b2826bd52dbbb41be87c3f339381c1700ad21ee5", size = 13943 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c5/3f/b0e8db149896005adc938a1e7f371d6d7e9eca4053a29b108978ed15e0c2/types_python_dateutil-2.9.0.20250516-py3-none-any.whl", hash = "sha256:2b2b3f57f9c6a61fba26a9c0ffb9ea5681c9b83e69cd897c6b5f668d9c0cab93", size = 14356 },
 ]
 
 [[package]]

@@ -1,0 +1,82 @@
+from __future__ import annotations
+
+import os
+
+from dotenv import find_dotenv
+from dotenv import load_dotenv
+from influxdb_client import InfluxDBClient
+from influxdb_client import Point
+from influxdb_client.client.write_api import SYNCHRONOUS
+from loguru import logger
+
+from twrate import Exchange
+from twrate import Rate
+from twrate import fetch_rates
+
+
+class RateWriter:
+    @classmethod
+    def from_env(cls) -> RateWriter:
+        token = os.getenv("INFLUXDB_TOKEN")
+        if token is None:
+            raise ValueError("INFLUXDB_TOKEN is not set")
+
+        org = os.getenv("INFLUXDB_ORG")
+        if org is None:
+            raise ValueError("INFLUXDB_ORG is not set")
+
+        url = os.getenv("INFLUXDB_URL")
+        if url is None:
+            raise ValueError("INFLUXDB_URL is not set")
+
+        bucket = os.getenv("INFLUXDB_BUCKET")
+        if bucket is None:
+            raise ValueError("INFLUXDB_BUCKET is not set")
+
+        return cls(token=token, org=org, url=url, bucket=bucket)
+
+    def __init__(self, *, token: str, org: str, url: str, bucket: str) -> None:
+        self.org = org
+        self.bucket = bucket
+        self.client = InfluxDBClient(url=url, token=token, org=org)
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
+
+    def write(self, rate: Rate) -> None:
+        point = (
+            Point("exchange_rates")
+            .tag("exchange", rate.exchange.name.upper())
+            .tag("source_currency", rate.source.upper())
+            .tag("target_currency", rate.target.upper())
+        )
+
+        if rate.spot_buy:
+            point = point.field("spot_buy", rate.spot_buy)
+
+        if rate.spot_sell:
+            point = point.field("spot_sell", rate.spot_sell)
+
+        if rate.cash_buy:
+            point = point.field("cash_buy", rate.cash_buy)
+
+        if rate.cash_sell:
+            point = point.field("cash_sell", rate.cash_sell)
+
+        if rate.updated_at:
+            point = point.time(rate.updated_at)
+
+        logger.info("[InfluxDB] write pioint: {} to bucket: {}", point, self.bucket)
+        self.write_api.write(bucket=self.bucket, org=self.org, record=point)
+
+
+def main() -> None:
+    load_dotenv(find_dotenv())
+
+    writer = RateWriter.from_env()
+    for exchange in Exchange:
+        rates = fetch_rates(exchange)
+        for rate in rates:
+            writer.write(rate)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from loguru import logger
@@ -6,11 +7,11 @@ from pydantic import field_validator
 
 
 class Exchange(str, Enum):
-    DBS = "DBS"
-    SINOPAC = "SINOPAC"
+    DBS = "DBS_BANK"
+    SINOPAC = "BANK_SINOPAC"
     BOT = "BANK_OF_TAIWAN"
-    ESUN = "ESUN"
-    LINE = "LINE"
+    ESUN = "ESUN_BANK"
+    LINE = "LINE_BANK"
 
     def __str__(self) -> str:
         return self.value
@@ -24,6 +25,7 @@ class Rate(BaseModel):
     spot_sell: float | None = None
     cash_buy: float | None = None
     cash_sell: float | None = None
+    updated_at: datetime | None = None
 
     @field_validator("spot_buy", "spot_sell", "cash_buy", "cash_sell", mode="before")
     @classmethod
