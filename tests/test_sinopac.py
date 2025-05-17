@@ -1,4 +1,5 @@
 from twrate.sinopac import query_sinopac_rates
+from twrate.types import Exchange
 from twrate.types import Rate
 
 
@@ -9,7 +10,7 @@ def test_query_sinopac_rates() -> None:
     assert len(rates) > 0
     for rate in rates:
         assert isinstance(rate, Rate)
-        assert rate.exchange == "sinopac"
+        assert rate.exchange == Exchange.SINOPAC
         assert rate.target == "TWD"
         assert rate.symbol == f"{rate.source}/{rate.target}"
 

@@ -1,9 +1,20 @@
+from enum import Enum
+
 from pydantic import BaseModel
 from pydantic import field_validator
 
 
+class Exchange(str, Enum):
+    DBS = "DBS"
+    SINOPAC = "SINOPAC"
+    BOT = "BANK_OF_TAIWAN"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class Rate(BaseModel):
-    exchange: str
+    exchange: Exchange
     source: str
     target: str
     spot_buy: float | None = None

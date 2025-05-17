@@ -1,5 +1,6 @@
 import httpx
 
+from .types import Exchange
 from .types import Rate
 
 
@@ -38,7 +39,7 @@ def query_bot_rates() -> list[Rate]:
             raise ValueError(f"Unexpected column value, got: {row}")
 
         rate = Rate(
-            exchange="BOT",
+            exchange=Exchange.BOT,
             source=columns[0],
             target="TWD",
             spot_buy=float(columns[3]),

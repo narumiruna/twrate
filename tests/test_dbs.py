@@ -1,4 +1,5 @@
 from twrate.dbs import query_dbs_rates
+from twrate.types import Exchange
 from twrate.types import Rate
 
 
@@ -9,7 +10,7 @@ def test_query_dbs_rate() -> None:
     assert len(rates) > 0
     for rate in rates:
         assert isinstance(rate, Rate)
-        assert rate.exchange == "DBS"
+        assert rate.exchange == Exchange.DBS
         assert rate.target == "TWD"
         assert rate.symbol == f"{rate.source}/{rate.target}"
 

@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 
+from .types import Exchange
 from .types import Rate
 
 
@@ -107,7 +108,7 @@ def query_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "all") 
     rates = []
     for item in data[0].sub_info:
         rate = Rate(
-            exchange="sinopac",
+            exchange=Exchange.SINOPAC,
             source=item.data_value4,
             target="TWD",
         )

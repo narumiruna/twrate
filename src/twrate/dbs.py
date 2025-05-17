@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 
+from .types import Exchange
 from .types import Rate
 
 # https://www.dbs.com.tw/personal-zh/rates/foreign-exchange-rates.page
@@ -58,7 +59,7 @@ class DBSRateResponse(BaseModel):
         for asset in self.results.assets:
             for rec_data in asset.rec_data:
                 rate = Rate(
-                    exchange="DBS",
+                    exchange=Exchange.DBS,
                     source=rec_data.currency,
                     target="TWD",
                     spot_buy=rec_data.tt_buy,
