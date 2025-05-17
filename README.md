@@ -8,6 +8,7 @@ A Python package for querying real-time exchange rates from major Taiwanese bank
 
 - Bank of Taiwan (台灣銀行)
 - DBS Bank Taiwan (星展銀行)
+- Sinopac Bank (永豐銀行)
 
 ## Installation
 
