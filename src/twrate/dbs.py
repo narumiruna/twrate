@@ -61,10 +61,10 @@ class DBSRateResponse(BaseModel):
                     exchange="DBS",
                     source=rec_data.currency,
                     target="TWD",
-                    spot_buy_rate=rec_data.tt_buy,
-                    spot_sell_rate=rec_data.tt_sell,
-                    cash_buy_rate=rec_data.cash_buy,
-                    cash_sell_rate=rec_data.cash_sell,
+                    spot_buy=rec_data.tt_buy,
+                    spot_sell=rec_data.tt_sell,
+                    cash_buy=rec_data.cash_buy,
+                    cash_sell=rec_data.cash_sell,
                 )
                 rates.append(rate)
         return rates

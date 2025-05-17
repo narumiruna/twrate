@@ -29,10 +29,10 @@ def query_bot_rates() -> list[Rate]:
                 exchange="BOT",
                 source=cols[0],
                 target="TWD",
-                spot_buy_rate=float(cols[3]),
-                spot_sell_rate=float(cols[13]),
-                cash_buy_rate=float(cols[2]),
-                cash_sell_rate=float(cols[12]),
+                spot_buy=float(cols[3]),
+                spot_sell=float(cols[13]),
+                cash_buy=float(cols[2]),
+                cash_sell=float(cols[12]),
             )
             rates.append(rate)
     return rates

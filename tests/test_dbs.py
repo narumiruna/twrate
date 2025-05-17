@@ -13,12 +13,12 @@ def test_query_dbs_rate() -> None:
         assert rate.target == "TWD"
         assert rate.symbol == f"{rate.source}/{rate.target}"
 
-        if rate.spot_buy_rate is not None and rate.spot_sell_rate is not None:
-            assert rate.spot_buy_rate > 0
-            assert rate.spot_sell_rate > 0
-            assert rate.spot_mid_rate == (rate.spot_buy_rate + rate.spot_sell_rate) / 2
+        if rate.spot_buy is not None and rate.spot_sell is not None:
+            assert rate.spot_buy > 0
+            assert rate.spot_sell > 0
+            assert rate.spot_mid == (rate.spot_buy + rate.spot_sell) / 2
 
-        if rate.cash_buy_rate is not None and rate.cash_sell_rate is not None:
-            assert rate.cash_buy_rate > 0
-            assert rate.cash_sell_rate > 0
-            assert rate.cash_mid_rate == (rate.cash_buy_rate + rate.cash_sell_rate) / 2
+        if rate.cash_buy is not None and rate.cash_sell is not None:
+            assert rate.cash_buy > 0
+            assert rate.cash_sell > 0
+            assert rate.cash_mid == (rate.cash_buy + rate.cash_sell) / 2
