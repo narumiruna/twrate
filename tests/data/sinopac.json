@@ -1,0 +1,175 @@
+[
+  {
+    "TitleInfo": "<font color=#b9160f>報價時間：2025-05-16 15:30:37<br><br>本資訊僅供參考，實際成交匯率以本行牌告交易當下所議定的匯率為準(牌告更新自營業時間9:00至15:30止)。</font>",
+    "QueryDate": "2025/05/18 01:41:24",
+    "HeadInfo": [
+      {
+        "HeadText": "幣別",
+        "HeadAlign": "2",
+        "DataAlign": "1",
+        "MainShow": "Y",
+        "DetailShow": "N",
+        "FieldKey": "DataValue1",
+        "OrderIndex": "01",
+        "FieldWidth": "20"
+      },
+      {
+        "HeadText": "銀行買進<br />Bank Buy",
+        "HeadAlign": "2",
+        "DataAlign": "2",
+        "MainShow": "Y",
+        "DetailShow": "N",
+        "FieldKey": "DataValue2",
+        "OrderIndex": "02",
+        "FieldWidth": "10"
+      },
+      {
+        "HeadText": "銀行賣出<br />Bank Sell",
+        "HeadAlign": "2",
+        "DataAlign": "2",
+        "MainShow": "Y",
+        "DetailShow": "N",
+        "FieldKey": "DataValue3",
+        "OrderIndex": "03",
+        "FieldWidth": "10"
+      },
+      {
+        "HeadText": "",
+        "HeadAlign": "2",
+        "DataAlign": "2",
+        "MainShow": "N",
+        "DetailShow": "N",
+        "FieldKey": "DataValue4",
+        "OrderIndex": "04",
+        "FieldWidth": "10"
+      },
+      {
+        "HeadText": "",
+        "HeadAlign": "2",
+        "DataAlign": "2",
+        "MainShow": "N",
+        "DetailShow": "N",
+        "FieldKey": "DataValue1Img",
+        "OrderIndex": "05",
+        "FieldWidth": "10"
+      }
+    ],
+    "SubInfo": [
+      {
+        "DataValue1": "美元(USD)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/USD.png",
+        "DataValue2": "29.8920",
+        "DataValue3": "30.4030",
+        "DataValue4": "USD"
+      },
+      {
+        "DataValue1": "日圓(JPY)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/JPY.png",
+        "DataValue2": "0.2028",
+        "DataValue3": "0.2111",
+        "DataValue4": "JPY"
+      },
+      {
+        "DataValue1": "港幣(HKD)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/HKD.png",
+        "DataValue2": "3.7917",
+        "DataValue3": "3.9255",
+        "DataValue4": "HKD"
+      },
+      {
+        "DataValue1": "歐元(EUR)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/EUR.png",
+        "DataValue2": "33.2599",
+        "DataValue3": "34.3335",
+        "DataValue4": "EUR"
+      },
+      {
+        "DataValue1": "英鎊(GBP)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/GBP.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "GBP"
+      },
+      {
+        "DataValue1": "瑞士法郎(CHF)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/CHF.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "CHF"
+      },
+      {
+        "DataValue1": "澳幣(AUD)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/AUD.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "AUD"
+      },
+      {
+        "DataValue1": "新加坡幣(SGD)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/SGD.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "SGD"
+      },
+      {
+        "DataValue1": "瑞典幣(SEK)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/SEK.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "SEK"
+      },
+      {
+        "DataValue1": "加拿大幣(CAD)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/CAD.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "CAD"
+      },
+      {
+        "DataValue1": "泰銖(THB)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/THB.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "THB"
+      },
+      {
+        "DataValue1": "南非幣(ZAR)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/ZAR.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "ZAR"
+      },
+      {
+        "DataValue1": "紐西蘭幣(NZD)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/NZD.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "NZD"
+      },
+      {
+        "DataValue1": "澳門幣(MOP)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/MOP.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "MOP"
+      },
+      {
+        "DataValue1": "人民幣(CNY)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/CNY.png",
+        "DataValue2": "4.0768",
+        "DataValue3": "4.2413",
+        "DataValue4": "CNY"
+      },
+      {
+        "DataValue1": "離岸人民幣(CNH)",
+        "DataValue1Img": "/mma8/mobile/images/Rate_Info/CNH.png",
+        "DataValue2": "-",
+        "DataValue3": "-",
+        "DataValue4": "CNH"
+      }
+    ],
+    "MemoUrl": null,
+    "Header": "SUCCESS",
+    "Message": ""
+  }
+]

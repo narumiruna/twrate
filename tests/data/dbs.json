@@ -1,0 +1,120 @@
+{
+  "total": "15",
+  "start": "0",
+  "included": "15",
+  "results": {
+    "assets": [
+      {
+        "recData": [
+          {
+            "currency": "AUD",
+            "ttSell": "19.61",
+            "ttBuy": "19.14",
+            "cashSell": null,
+            "cashBuy": null
+          },
+          {
+            "currency": "CAD",
+            "ttSell": "21.77",
+            "ttBuy": "21.43",
+            "cashSell": null,
+            "cashBuy": null
+          },
+          {
+            "currency": "CHF",
+            "ttSell": "36.28",
+            "ttBuy": "35.72",
+            "cashSell": null,
+            "cashBuy": null
+          },
+          {
+            "currency": "CNH",
+            "ttSell": "4.2152",
+            "ttBuy": "4.1530",
+            "cashSell": null,
+            "cashBuy": null
+          },
+          {
+            "currency": "CNY",
+            "ttSell": "4.2165",
+            "ttBuy": "4.1521",
+            "cashSell": "4.2874",
+            "cashBuy": "4.0807"
+          },
+          {
+            "currency": "EUR",
+            "ttSell": "33.96",
+            "ttBuy": "33.39",
+            "cashSell": "34.33",
+            "cashBuy": "33.01"
+          },
+          {
+            "currency": "GBP",
+            "ttSell": "40.48",
+            "ttBuy": "39.71",
+            "cashSell": null,
+            "cashBuy": null
+          },
+          {
+            "currency": "HKD",
+            "ttSell": "3.899",
+            "ttBuy": "3.822",
+            "cashSell": "3.919",
+            "cashBuy": "3.802"
+          },
+          {
+            "currency": "JPY",
+            "ttSell": "0.2094",
+            "ttBuy": "0.2044",
+            "cashSell": "0.2108",
+            "cashBuy": "0.2031"
+          },
+          {
+            "currency": "NZD",
+            "ttSell": "17.92",
+            "ttBuy": "17.57",
+            "cashSell": null,
+            "cashBuy": null
+          },
+          {
+            "currency": "SEK",
+            "ttSell": "3.1414",
+            "ttBuy": "3.0296",
+            "cashSell": null,
+            "cashBuy": null
+          },
+          {
+            "currency": "SGD",
+            "ttSell": "23.330",
+            "ttBuy": "23.077",
+            "cashSell": "23.461",
+            "cashBuy": "22.940"
+          },
+          {
+            "currency": "THB",
+            "ttSell": "0.929",
+            "ttBuy": "0.881",
+            "cashSell": null,
+            "cashBuy": null
+          },
+          {
+            "currency": "USD",
+            "ttSell": "30.279",
+            "ttBuy": "30.076",
+            "cashSell": "30.470",
+            "cashBuy": "29.863"
+          },
+          {
+            "currency": "ZAR",
+            "ttSell": "1.7301",
+            "ttBuy": "1.6174",
+            "cashSell": null,
+            "cashBuy": null
+          }
+        ]
+      }
+    ]
+  },
+  "lastUpdatedDateAndTime": "2025-05-17 10:00:01",
+  "effectiveDateAndTime": "2025-05-17 18:00:00"
+}
