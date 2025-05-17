@@ -3,6 +3,7 @@ from enum import Enum
 
 from loguru import logger
 from pydantic import BaseModel
+from pydantic import Field
 from pydantic import field_validator
 
 
@@ -25,7 +26,7 @@ class Rate(BaseModel):
     spot_sell: float | None = None
     cash_buy: float | None = None
     cash_sell: float | None = None
-    updated_at: datetime | None = None
+    fetched_at: datetime = Field(default_factory=datetime.now)
 
     @field_validator("spot_buy", "spot_sell", "cash_buy", "cash_sell", mode="before")
     @classmethod

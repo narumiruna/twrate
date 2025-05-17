@@ -71,7 +71,6 @@ def fetch_esun_rates() -> list[Rate]:
             spot_sell=r.s_board_rate,
             cash_buy=r.cash_b_board_rate,
             cash_sell=r.cash_s_board_rate,
-            updated_at=r.update_time,
         )
         rates.append(rate)
     return rates

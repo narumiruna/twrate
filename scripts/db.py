@@ -47,6 +47,7 @@ class RateWriter:
             .tag("exchange", rate.exchange.name.upper())
             .tag("source_currency", rate.source.upper())
             .tag("target_currency", rate.target.upper())
+            .time(rate.fetched_at)
         )
 
         if rate.spot_buy:
@@ -60,9 +61,6 @@ class RateWriter:
 
         if rate.cash_sell:
             point = point.field("cash_sell", rate.cash_sell)
-
-        if rate.updated_at:
-            point = point.time(rate.updated_at)
 
         logger.info("[InfluxDB] write pioint: {} to bucket: {}", point, self.bucket)
         self.write_api.write(bucket=self.bucket, org=self.org, record=point)
