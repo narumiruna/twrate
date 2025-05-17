@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pydantic import field_validator
 
 
 class Rate(BaseModel):
@@ -9,6 +10,19 @@ class Rate(BaseModel):
     spot_sell_rate: float | None = None
     cash_buy_rate: float | None = None
     cash_sell_rate: float | None = None
+
+    @field_validator("spot_buy_rate", "spot_sell_rate", "cash_buy_rate", "cash_sell_rate", mode="before")
+    @classmethod
+    def convert_to_float(cls, value: float | str | None) -> float | None:
+        if value is None:
+            return None
+
+        if isinstance(value, float):
+            if value == 0:
+                return None
+            return value
+
+        return float(value)
 
     @property
     def spot_mid_rate(self) -> float:
