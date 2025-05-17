@@ -34,6 +34,25 @@ dbs_rates = query_dbs_rates()
 print(dbs_rates)
 ```
 
+### Command-Line Interface
+
+You can also use `twrate` directly from the command line:
+
+```bash
+# Query exchange rates for USD from all supported banks
+twrate USD
+```
+
+Example output:
+```
+Exchange          Spot Buy    Spot Sell    Cash Buy    Cash Sell
+--------------  ----------  -----------  ----------  -----------
+BANK_OF_TAIWAN      30.095       30.245      29.77        30.44
+DBS                 30.076       30.279      29.863       30.47
+SINOPAC             30.092       30.203      29.892       30.403
+ESUN                30.1         30.2        29.85        30.4
+```
+
 ### Rate Information
 
 The `Rate` object provides the following information:
