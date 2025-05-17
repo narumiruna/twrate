@@ -21,7 +21,7 @@ class RecDatum(BaseModel):
 
     @field_validator("tt_sell", "tt_buy", "cash_sell", "cash_buy", mode="before")
     @classmethod
-    def convert_to_float(cls, value: str | None) -> float | None:
+    def parse_float(cls, value: str | None) -> float | None:
         if value is None:
             return None
         return float(value)
@@ -45,12 +45,12 @@ class DBSRateResponse(BaseModel):
 
     @field_validator("total", "start", "included", mode="before")
     @classmethod
-    def convert_to_int(cls, value: str) -> int:
+    def parse_int(cls, value: str) -> int:
         return int(value)
 
     @field_validator("last_updated_date_and_time", "effective_date_and_time", mode="before")
     @classmethod
-    def convert_to_str(cls, value: str) -> datetime:
+    def parse_datetime(cls, value: str) -> datetime:
         return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
 
     def to_rates(self) -> list[Rate]:

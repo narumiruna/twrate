@@ -13,7 +13,7 @@ class Rate(BaseModel):
 
     @field_validator("spot_buy", "spot_sell", "cash_buy", "cash_sell", mode="before")
     @classmethod
-    def convert_to_float(cls, value: float | str | None) -> float | None:
+    def parse_float(cls, value: float | str | None) -> float | None:
         if value is None:
             return None
 
