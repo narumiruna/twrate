@@ -4,7 +4,7 @@ from typing import Final
 
 from loguru import logger
 
-from .fetchers import fetch_rates
+from .fetcher import fetch_rates
 from .types import Exchange
 from .types import Rate
 
