@@ -53,6 +53,7 @@ def run(source_currency: str) -> None:
                 "Cash Sell",
                 "Cash Spread",
             ],
+            stralign="right",
         )
     )
 
