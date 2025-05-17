@@ -1,7 +1,7 @@
 import httpx
 
-from .types import Exchange
-from .types import Rate
+from ..types import Exchange
+from ..types import Rate
 
 
 def check_header(header: str) -> None:

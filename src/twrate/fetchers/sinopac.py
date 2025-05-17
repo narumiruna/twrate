@@ -9,8 +9,8 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 
-from .types import Exchange
-from .types import Rate
+from ..types import Exchange
+from ..types import Rate
 
 
 class HeadInfoItem(BaseModel):

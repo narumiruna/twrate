@@ -1,16 +1,17 @@
-from twrate.dbs import fetch_dbs_rates
+import pytest
+
+from twrate.fetcher import fetch_rates
 from twrate.types import Exchange
-from twrate.types import Rate
 
 
-def test_query_dbs_rate() -> None:
-    rates = fetch_dbs_rates()
+@pytest.mark.parametrize("exchange", list(Exchange))
+def test_fetch_rates(exchange: Exchange) -> None:
+    rates = fetch_rates(exchange)
 
     assert isinstance(rates, list)
     assert len(rates) > 0
     for rate in rates:
-        assert isinstance(rate, Rate)
-        assert rate.exchange == Exchange.DBS
+        assert rate.exchange == exchange
         assert rate.target == "TWD"
         assert rate.symbol == f"{rate.source}/{rate.target}"
 
