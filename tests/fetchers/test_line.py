@@ -1,16 +1,16 @@
-from twrate.bot import fetch_bot_rates
+from twrate.fetchers.line import fetch_line_rates
 from twrate.types import Exchange
 from twrate.types import Rate
 
 
-def test_query_bot_rates() -> None:
-    rates = fetch_bot_rates()
+def test_query_sinopac_rates() -> None:
+    rates = fetch_line_rates()
 
     assert isinstance(rates, list)
     assert len(rates) > 0
     for rate in rates:
         assert isinstance(rate, Rate)
-        assert rate.exchange == Exchange.BOT
+        assert rate.exchange == Exchange.LINE
         assert rate.target == "TWD"
         assert rate.symbol == f"{rate.source}/{rate.target}"
 

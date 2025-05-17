@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 
-from .types import Exchange
-from .types import Rate
+from ..types import Exchange
+from ..types import Rate
 
 # https://www.dbs.com.tw/personal-zh/rates/foreign-exchange-rates.page
 

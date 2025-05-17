@@ -1,16 +1,16 @@
-from twrate.dbs import fetch_dbs_rates
+from twrate.fetchers.esun import fetch_esun_rates
 from twrate.types import Exchange
 from twrate.types import Rate
 
 
-def test_query_dbs_rate() -> None:
-    rates = fetch_dbs_rates()
+def test_query_sinopac_rates() -> None:
+    rates = fetch_esun_rates()
 
     assert isinstance(rates, list)
     assert len(rates) > 0
     for rate in rates:
         assert isinstance(rate, Rate)
-        assert rate.exchange == Exchange.DBS
+        assert rate.exchange == Exchange.ESUN
         assert rate.target == "TWD"
         assert rate.symbol == f"{rate.source}/{rate.target}"
 

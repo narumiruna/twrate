@@ -1,4 +1,4 @@
-from twrate.sinopac import fetch_sinopac_rates
+from twrate.fetchers.sinopac import fetch_sinopac_rates
 from twrate.types import Exchange
 from twrate.types import Rate
 
