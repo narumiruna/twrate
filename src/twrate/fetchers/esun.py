@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 import httpx
 from pydantic import BaseModel
 from pydantic import Field
@@ -17,7 +19,7 @@ class EsunRate(BaseModel):
     cash_s_board_rate: float | None = Field(..., validation_alias="CashSBoardRate")
     buy_increase_rate: float | None = Field(..., validation_alias="BuyIncreaseRate")
     sell_decrease_rate: float | None = Field(..., validation_alias="SellDecreaseRate")
-    update_time: str = Field(..., validation_alias="UpdateTime")
+    update_time: datetime = Field(..., validation_alias="UpdateTime")
     ccy: str = Field(..., validation_alias="CCY")
     key: str = Field(..., validation_alias="Key")
     url: str | None = Field(..., validation_alias="Url")
@@ -34,6 +36,12 @@ class EsunRate(BaseModel):
         if value == "-" or value == "":
             return None
         return float(value)
+
+    @field_validator("update_time", mode="before")
+    @classmethod
+    def parse_datetime(cls, value: str) -> datetime:
+        # "UpdateTime": "/Date(1747481401000)/",
+        return datetime.fromtimestamp(int(value[6:-2]) / 1000)
 
 
 class EsunRateResponse(BaseModel):
@@ -63,6 +71,7 @@ def fetch_esun_rates() -> list[Rate]:
             spot_sell=r.s_board_rate,
             cash_buy=r.cash_b_board_rate,
             cash_sell=r.cash_s_board_rate,
+            updated_at=r.update_time,
         )
         rates.append(rate)
     return rates

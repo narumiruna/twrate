@@ -1,3 +1,5 @@
+from loguru import logger
+
 from .fetchers.bot import fetch_bot_rates
 from .fetchers.dbs import fetch_dbs_rates
 from .fetchers.esun import fetch_esun_rates
@@ -8,6 +10,7 @@ from .types import Rate
 
 
 def fetch_rates(exchange: Exchange) -> list[Rate]:
+    logger.info("Fetching rates from {}", exchange.name)
     match exchange:
         case Exchange.SINOPAC:
             return fetch_sinopac_rates()
