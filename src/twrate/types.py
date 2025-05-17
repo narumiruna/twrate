@@ -8,6 +8,7 @@ class Exchange(str, Enum):
     DBS = "DBS"
     SINOPAC = "SINOPAC"
     BOT = "BANK_OF_TAIWAN"
+    ESUN = "ESUN"
 
     def __str__(self) -> str:
         return self.value
