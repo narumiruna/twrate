@@ -12,9 +12,6 @@ dependencies = [
     "rich>=14.0.0",
 ]
 
-[project.scripts]
-twrate = "twrate.cli:main"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
