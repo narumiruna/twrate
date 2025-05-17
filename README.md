@@ -45,15 +45,6 @@ The `Rate` object provides the following information:
 - `cash_sell`: The bank's selling rate for cash transactions
 - `spot_mid`: A calculated property that returns the mid-rate between spot buy and sell
 
-## Requirements
-
-- Python 3.12+
-- Dependencies:
-  - httpx
-  - loguru
-  - pydantic
-  - rich
-
 ## License
 
 See the [LICENSE](LICENSE) file for details.
