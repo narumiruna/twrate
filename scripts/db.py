@@ -41,7 +41,9 @@ class RateWriter:
         self.client = InfluxDBClient(url=url, token=token, org=org)
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
 
-    def write(self, rate: Rate) -> None:
+    def create_point(self, rate: Rate) -> Point:
+        logger.info("[InfluxDB] creating point from: {}", rate)
+
         point = (
             Point("exchange_rates")
             .tag("exchange", rate.exchange.name.upper())
@@ -62,18 +64,30 @@ class RateWriter:
         if rate.cash_sell:
             point = point.field("cash_sell", rate.cash_sell)
 
-        logger.info("[InfluxDB] write pioint: {} to bucket: {}", point, self.bucket)
-        self.write_api.write(bucket=self.bucket, org=self.org, record=point)
+        return point
+
+    def create_points(self, rates: list[Rate]) -> list[Point]:
+        return [self.create_point(rate) for rate in rates]
+
+    def write_points(self, points: list[Point]) -> None:
+        logger.info("[InfluxDB] writing points")
+        self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+
+    def write_rates(self, rates: list[Rate]) -> None:
+        points = self.create_points(rates)
+        self.write_points(points)
 
 
 def main() -> None:
     load_dotenv(find_dotenv())
 
     writer = RateWriter.from_env()
+
+    rates = []
     for exchange in Exchange:
-        rates = fetch_rates(exchange)
-        for rate in rates:
-            writer.write(rate)
+        rates.extend(fetch_rates(exchange))
+
+    writer.write_rates(rates)
 
 
 if __name__ == "__main__":
