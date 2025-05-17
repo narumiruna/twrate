@@ -9,6 +9,7 @@ A Python package for querying real-time exchange rates from major Taiwanese bank
 - Bank of Taiwan (台灣銀行)
 - DBS Bank Taiwan (星展銀行)
 - Sinopac Bank (永豐銀行)
+- E.SUN Bank (玉山銀行)
 
 ## Installation
 
@@ -21,8 +22,8 @@ pip install twrate
 ### Basic Usage
 
 ```python
-from twrate.bot import query_bot_rates  # Bank of Taiwan
-from twrate.dbs import query_dbs_rates  # DBS Bank
+from twrate import query_bot_rates  # Bank of Taiwan
+from twrate import query_dbs_rates  # DBS Bank
 
 # Get exchange rates from Bank of Taiwan
 bot_rates = query_bot_rates()
