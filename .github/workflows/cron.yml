@@ -16,7 +16,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Run
         run: uv run python scripts/db.py
         env:
           INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
