@@ -8,6 +8,7 @@ A Python package for querying real-time exchange rates from major Taiwanese bank
 
 - Bank of Taiwan (台灣銀行)
 - DBS Bank Taiwan (星展銀行)
+- Sinopac Bank (永豐銀行)
 
 ## Installation
 
@@ -44,15 +45,6 @@ The `Rate` object provides the following information:
 - `cash_buy`: The bank's buying rate for cash transactions
 - `cash_sell`: The bank's selling rate for cash transactions
 - `spot_mid`: A calculated property that returns the mid-rate between spot buy and sell
-
-## Requirements
-
-- Python 3.12+
-- Dependencies:
-  - httpx
-  - loguru
-  - pydantic
-  - rich
 
 ## License
 
