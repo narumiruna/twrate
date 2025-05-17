@@ -3,36 +3,48 @@ import httpx
 from .types import Rate
 
 
-# bank of taiwan
+def check_header(header: str) -> None:
+    columns = [s for s in header.split(" ") if s]
+    if (
+        columns[0] != "幣別"
+        or columns[2] != "現金"
+        or columns[3] != "即期"
+        or columns[12] != "現金"
+        or columns[13] != "即期"
+    ):
+        raise ValueError(f"Unexpected header value, got: {header}")
+
+
 def query_bot_rates() -> list[Rate]:
+    """Query Bank of Taiwan exchange rates.
+
+    Returns a list of Rate objects with the exchange rates for various currencies.
+    """
     url = "https://rate.bot.com.tw/xrt/fltxt/0/day"
 
     resp = httpx.get(url)
     resp.raise_for_status()
     resp.encoding = "utf-8-sig"
 
-    rates = []
-    for i, row in enumerate(resp.text.splitlines()):
-        if i == 0:
-            cols = [s for s in row.split(" ") if s]
-            assert cols[0] == "幣別"
-            assert cols[2] == "現金"
-            assert cols[3] == "即期"
-            assert cols[12] == "現金"
-            assert cols[13] == "即期"
-        else:
-            cols = [s for s in row.split(" ") if s]
-            assert cols[1] == "本行買入"
-            assert cols[11] == "本行賣出"
+    splits = resp.text.splitlines()
+    header, rows = splits[0], splits[1:]
+    check_header(header)
 
-            rate = Rate(
-                exchange="BOT",
-                source=cols[0],
-                target="TWD",
-                spot_buy=float(cols[3]),
-                spot_sell=float(cols[13]),
-                cash_buy=float(cols[2]),
-                cash_sell=float(cols[12]),
-            )
-            rates.append(rate)
+    rates = []
+    for row in rows:
+        columns = [s for s in row.split(" ") if s]
+
+        if columns[1] != "本行買入" or columns[11] != "本行賣出":
+            raise ValueError(f"Unexpected column value, got: {row}")
+
+        rate = Rate(
+            exchange="BOT",
+            source=columns[0],
+            target="TWD",
+            spot_buy=columns[3],
+            spot_sell=columns[13],
+            cash_buy=columns[2],
+            cash_sell=columns[12],
+        )
+        rates.append(rate)
     return rates

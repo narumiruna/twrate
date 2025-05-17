@@ -22,7 +22,10 @@ class Rate(BaseModel):
                 return None
             return value
 
-        return float(value)
+        value = float(value)
+        if value == 0:
+            return None
+        return value
 
     @property
     def spot_mid(self) -> float:
