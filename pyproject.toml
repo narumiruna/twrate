@@ -24,6 +24,7 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "influxdb-client>=1.48.0",
     "mypy>=1.15.0",
     "pip>=25.1.1",
     "pytest>=8.3.3",
