@@ -66,16 +66,10 @@ class RateWriter:
 
         return point
 
-    def create_points(self, rates: list[Rate]) -> list[Point]:
-        return [self.create_point(rate) for rate in rates]
-
-    def write_points(self, points: list[Point]) -> None:
-        logger.info("[InfluxDB] writing points")
-        self.write_api.write(bucket=self.bucket, org=self.org, record=points)
-
     def write_rates(self, rates: list[Rate]) -> None:
-        points = self.create_points(rates)
-        self.write_points(points)
+        logger.info("[InfluxDB] writing {} rates to InfluxDB", len(rates))
+        points = [self.create_point(rate) for rate in rates]
+        self.write_api.write(bucket=self.bucket, org=self.org, record=points)
 
 
 def main() -> None:
