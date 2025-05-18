@@ -79,7 +79,11 @@ def main() -> None:
 
     rates = []
     for exchange in Exchange:
-        rates.extend(fetch_rates(exchange))
+        try:
+            rates.extend(fetch_rates(exchange))
+        except Exception as e:
+            logger.error("Error fetching rates from {}: {}", exchange.name, e)
+            continue
 
     writer.write_rates(rates)
 
