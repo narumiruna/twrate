@@ -23,9 +23,7 @@ def run(source_currency: str) -> None:
 
     # sort rates by spot_spread
     def sort_key(rate: Rate) -> float:
-        if rate.spot_spread is None:
-            return float("inf")
-        return rate.spot_spread
+        return rate.spot_spread or float("inf")
 
     rates = sorted(rates, key=sort_key)
 
