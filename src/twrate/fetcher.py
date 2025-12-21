@@ -14,7 +14,7 @@ from .types import Rate
 
 
 async def fetch_rates(exchange: Exchange) -> list[Rate]:
-    logger.info("Fetching rates from {}", exchange.name)
+    logger.info("Fetching rates from {:12s}", exchange.name)
     match exchange:
         case Exchange.SINOPAC:
             return await fetch_sinopac_rates()

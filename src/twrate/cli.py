@@ -22,7 +22,7 @@ async def fetch_all_rates() -> list[Rate]:
 
     for exchange, result in zip(Exchange, results, strict=False):
         if isinstance(result, Exception):
-            logger.error(f"Error fetching {exchange.value}: {result}")
+            logger.error("Error fetching {:12s}: {}", exchange.value, result)
         else:
             rates.extend(result)
 

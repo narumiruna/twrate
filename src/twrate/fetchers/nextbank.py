@@ -63,5 +63,5 @@ async def fetch_nextbank_rates() -> list[Rate]:
         if not rates:
             raise ValueError("No valid Next Bank rates parsed from API response")
 
-        logger.info("Parsed Next Bank rates for currencies: {}", [r.source for r in rates])
+        logger.info("Parsed {:12s} rates for currencies: {}", "NEXT", [r.source for r in rates])
         return rates
