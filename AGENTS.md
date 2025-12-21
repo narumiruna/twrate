@@ -4,6 +4,32 @@
 
 `twrate` implements a fetcher-based architecture where each agent (fetcher) is responsible for retrieving exchange rate data from a specific Taiwanese bank. The system uses a consistent data model (`Rate`) across all fetchers, enabling seamless integration and comparison of rates from different sources.
 
+## Development Workflow
+
+### Running the Application
+
+Use `uv` for all Python-related operations:
+
+```bash
+# Run the CLI to fetch rates for a specific currency
+uv run twrate USD
+
+# Run tests
+uv run pytest
+
+# Install dependencies
+uv sync
+
+# Add a new dependency
+uv add <package-name>
+```
+
+**Why `uv`?**
+- Fast dependency resolution and installation
+- Automatic virtual environment management
+- Consistent across development, testing, and CI/CD
+- Lock file (`uv.lock`) ensures reproducible builds
+
 ## Core Components
 
 ### Rate Model (`types.py`)
@@ -39,6 +65,7 @@ Defines supported banks:
 - `LINE`: Line Bank (LINE Bank)
 - `HSBC`: HSBC Bank Taiwan (匯豐銀行)
 - `NEXT`: Next Bank (將來銀行)
+- `KGI`: KGI Bank (凱基銀行)
 
 ## Fetcher Agents
 
@@ -300,6 +327,125 @@ Each fetcher has corresponding test cases in `tests/test_fetcher.py`:
 - **beautifulsoup4**: HTML parsing (Line Bank only)
 - **loguru**: Logging framework
 
+## Troubleshooting and Lessons Learned
+
+### Issue: JavaScript-Rendered Content (Taishin Bank Case Study)
+
+**Problem Description:**
+When implementing the Taishin Bank fetcher, we encountered a critical issue where the standard `httpx` + `BeautifulSoup` approach failed to extract any data.
+
+**Investigation Process:**
+
+1. **Initial Symptoms**
+   ```python
+   tables = soup.find_all('table')
+   print(f'Tables found: {len(tables)}')  # Result: 0
+   ```
+   - Initial HTTP GET returned HTML with no table elements
+   - Content appeared to be present when viewing in browser
+
+2. **Diagnostic Steps**
+   - Used Playwright MCP to inspect the fully-rendered page
+     - Confirmed tables exist after JavaScript execution
+     - Found nested table structure with currency data
+   - Checked network requests for separate API endpoints
+     - No dedicated API found for rate data
+   - Examined page source for embedded JSON data in `<script>` tags
+     - Data not embedded in page source
+
+3. **Root Cause Analysis**
+   ```
+   Browser Request → Initial HTML (no tables)
+                  ↓
+           JavaScript Execution
+                  ↓
+         DOM Manipulation (tables created)
+                  ↓
+           Fully Rendered Page
+   ```
+
+   **Key Finding**: Taishin Bank's exchange rate table is generated entirely via client-side JavaScript, making it invisible to traditional HTTP scraping.
+
+**Technical Verification:**
+```bash
+# Test with httpx (fails)
+uv run python -c "
+import httpx
+from bs4 import BeautifulSoup
+resp = httpx.get('https://www.taishinbank.com.tw/TSB/personal/deposit/lookup/realtime/')
+soup = BeautifulSoup(resp.text, 'html.parser')
+print(f'Tables: {len(soup.find_all(\"table\"))}')  # 0
+print('USD in response:', '美元USD' in resp.text)  # False
+"
+
+# Test with Playwright (succeeds)
+# - Can extract table data after page load
+# - Tables visible in DOM after JavaScript execution
+```
+
+**Solution Options Evaluated:**
+
+| Approach | Pros | Cons | Decision |
+|----------|------|------|----------|
+| **Selenium/Playwright** | ✅ Full browser automation<br>✅ Handles all JS rendering<br>✅ Most reliable | ❌ Heavy dependencies (100+ MB)<br>❌ Slower execution<br>❌ Browser installation required | ❌ Rejected for now |
+| **Reverse Engineer JS** | ✅ Lightweight solution<br>✅ Fast execution | ❌ Time-consuming analysis<br>❌ Brittle (breaks if JS changes)<br>❌ May encounter obfuscation | ❌ Not pursued |
+| **Accept Limitation** | ✅ Maintains lightweight design<br>✅ No new dependencies<br>✅ Fast for other banks | ❌ Missing one data source | ✅ **Adopted** |
+
+**Current Status:**
+- Fetcher code exists but returns empty results
+- Error is logged but doesn't crash the application
+- Other 7 banks continue to function normally
+
+**Lessons for Future Implementations:**
+
+1. **Early Detection**: Test with actual HTTP requests during initial investigation, not just browser inspection
+2. **Network Analysis**: Always check browser DevTools Network tab for API calls before scraping HTML
+3. **Progressive Enhancement**: Start with simplest approach (REST API > Static HTML > Dynamic HTML)
+4. **Graceful Degradation**: Design fetchers to fail independently without affecting others
+5. **Documentation**: Document technical limitations clearly for future maintainers
+
+**Decision Framework for Similar Issues:**
+
+```python
+def evaluate_data_source(url: str) -> str:
+    """
+    Decision tree for choosing scraping approach.
+    """
+    # 1. Check for API
+    if has_public_api(url):
+        return "Use REST API fetcher"
+
+    # 2. Check for static HTML
+    if data_in_initial_html(url):
+        return "Use httpx + BeautifulSoup"
+
+    # 3. Check for embedded JSON
+    if data_in_script_tags(url):
+        return "Parse JSON from script tags"
+
+    # 4. JavaScript-rendered content
+    if requires_js_execution(url):
+        if is_critical_data_source():
+            return "Use Playwright/Selenium"
+        else:
+            return "Skip or mark as unsupported"
+
+    return "Investigate further"
+```
+
+**Impact on Architecture:**
+- Reinforced the importance of parallel fetching (one failure doesn't block others)
+- Validated the error handling strategy (log errors, continue execution)
+- Highlighted the trade-off between coverage and simplicity
+
+### Best Practices Summary
+
+1. **Verify Early**: Test data extraction with actual code before committing to an approach
+2. **Use the Right Tool**: Match the tool to the data source complexity
+3. **Fail Gracefully**: Design for partial success in multi-source systems
+4. **Document Thoroughly**: Record technical limitations and decision rationale
+5. **Maintain Focus**: Don't over-engineer solutions for edge cases
+
 ## Future Enhancements
 
 Potential improvements for the agent architecture:
@@ -312,3 +458,4 @@ Potential improvements for the agent architecture:
 6. **Historical Data**: Support time-series rate retrieval
 7. **Webhook Support**: Real-time rate updates
 8. **Multi-Currency**: Support non-TWD target currencies
+9. **Optional Browser Automation**: Add Playwright as optional dependency for JS-heavy sites
