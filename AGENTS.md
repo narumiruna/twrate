@@ -37,6 +37,8 @@ Defines supported banks:
 - `BOT`: Bank of Taiwan (台灣銀行)
 - `ESUN`: E.SUN Bank (玉山銀行)
 - `LINE`: Line Bank (LINE Bank)
+- `HSBC`: HSBC Bank Taiwan (匯豐銀行)
+- `NEXT`: Next Bank (將來銀行)
 
 ## Fetcher Agents
 
@@ -132,6 +134,43 @@ Each fetcher agent implements a `fetch_*_rates()` function that returns a `list[
 - Rate merging logic to combine spot and cash
 - Comprehensive data structure validation
 
+### 6. HSBC Bank Fetcher (`hsbc.py`)
+
+**Data Source**: HTML scraping
+**URL**: `https://www.hsbc.com.tw/currency-rates/`
+**Format**: HTML
+
+**Implementation Details:**
+- Uses BeautifulSoup for HTML parsing
+- Extracts currency codes from table cells using regex
+- Parses structured table with tbody element
+- Handles missing rates with dash ("-") placeholder
+
+**Key Features:**
+- HTML table scraping approach
+- Regex-based currency code extraction
+- Simple parse_rate helper function
+- Follows redirects for proper page loading
+
+### 7. Next Bank Fetcher (`nextbank.py`)
+
+**Data Source**: HTML scraping
+**URL**: `https://www.nextbank.com.tw/exchange-rates`
+**Format**: HTML
+
+**Implementation Details:**
+- Uses BeautifulSoup for HTML parsing
+- Extracts currency codes from table cells using regex patterns
+- Validates 3-letter ISO currency codes
+- Skips rows without valid currency codes
+- Handles missing rates gracefully
+
+**Key Features:**
+- HTML table scraping approach
+- Dual pattern matching for currency codes (with/without parentheses)
+- Defensive column access with length checks
+- Descriptive error messages for debugging
+
 ## Fetcher Selection (`fetcher.py`)
 
 The `fetch_rates()` function acts as a dispatcher:
@@ -149,6 +188,10 @@ def fetch_rates(exchange: Exchange) -> list[Rate]:
             return fetch_bot_rates()
         case Exchange.DBS:
             return fetch_dbs_rates()
+        case Exchange.HSBC:
+            return fetch_hsbc_rates()
+        case Exchange.NEXT:
+            return fetch_nextbank_rates()
 ```
 
 ## Adding New Fetchers
