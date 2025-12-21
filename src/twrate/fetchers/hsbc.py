@@ -1,10 +1,35 @@
 from __future__ import annotations
 
+import re
+
 import httpx
 from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+
+# Expected number of columns in the currency rates table
+EXPECTED_COLUMNS = 5
+
+
+def extract_currency_code(currency_text: str) -> str:
+    """Extract currency code from text like 'Currency Name (CODE)' or just 'CODE'."""
+    # Try to extract code from parentheses using regex for safety
+    match = re.search(r"\(([A-Z]{3})\)", currency_text)
+    if match:
+        return match.group(1)
+    # If no parentheses found, assume the text is the code itself
+    return currency_text.strip()
+
+
+def parse_rate(value: str) -> float | None:
+    """Parse a rate value, handling '-' or empty strings."""
+    if not value or value == "-" or value == "":
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
 
 
 def fetch_hsbc_rates() -> list[Rate]:
@@ -20,6 +45,7 @@ def fetch_hsbc_rates() -> list[Rate]:
     soup = BeautifulSoup(resp.text, "html.parser")
 
     rates = []
+    # Find the first table on the page - HSBC currency rates page has only one main table
     table = soup.find("table")
 
     if not table:
@@ -31,27 +57,11 @@ def fetch_hsbc_rates() -> list[Rate]:
 
     for row in tbody.find_all("tr"):
         cols = [td.get_text(strip=True) for td in row.find_all("td")]
-        if not cols or len(cols) < 5:
+        if not cols or len(cols) < EXPECTED_COLUMNS:
             continue
 
         # Extract currency code from the first column
-        # Format is typically "Currency Name (CODE)" or just "CODE"
-        currency_text = cols[0]
-        if "(" in currency_text and ")" in currency_text:
-            # Extract code from parentheses
-            currency_code = currency_text.split("(")[1].split(")")[0].strip()
-        else:
-            # Use the text as-is if no parentheses
-            currency_code = currency_text.strip()
-
-        # Parse float values, handling '-' or empty strings
-        def parse_rate(value: str) -> float | None:
-            if not value or value == "-" or value == "":
-                return None
-            try:
-                return float(value)
-            except ValueError:
-                return None
+        currency_code = extract_currency_code(cols[0])
 
         rate = Rate(
             exchange=Exchange.HSBC,
