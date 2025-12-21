@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from typing import Any
 from typing import Literal
@@ -87,8 +88,10 @@ async def fetch_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "
     Returns a list of Rate objects with the exchange rates for various currencies.
     """
     if exchange_type == "all":
-        remit_rates = await fetch_sinopac_rates("remit")
-        cash_rates = await fetch_sinopac_rates("cash")
+        remit_rates, cash_rates = await asyncio.gather(
+            fetch_sinopac_rates("remit"),
+            fetch_sinopac_rates("cash"),
+        )
         return merge_rates(
             remit_rates=remit_rates,
             cash_rates=cash_rates,
