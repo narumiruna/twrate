@@ -1,3 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
+
 import typer
 from rich import print
 from tabulate import tabulate
@@ -15,8 +18,16 @@ def run(source_currency: str) -> None:
     """
 
     rates: list[Rate] = []
-    for exchange in Exchange:
-        rates.extend(fetch_rates(exchange))
+
+    # Fetch rates in parallel
+    with ThreadPoolExecutor() as executor:
+        futures = {executor.submit(fetch_rates, exchange): exchange for exchange in Exchange}
+        for future in as_completed(futures):
+            exchange = futures[future]
+            try:
+                rates.extend(future.result())
+            except Exception as e:
+                print(f"[red]Error fetching {exchange.value}: {e}[/red]")
 
     # filter rates by source_currency
     rates = [rate for rate in rates if rate.source == source_currency.upper()]
