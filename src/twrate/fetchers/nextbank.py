@@ -40,11 +40,13 @@ def fetch_nextbank_rates() -> list[Rate]:
     table = soup.find("table")
 
     if not table:
-        raise ValueError("No table found in the Next Bank exchange rates page")
+        raise ValueError(
+            "No exchange rates table found in the Next Bank page at https://www.nextbank.com.tw/exchange-rates"
+        )
 
     tbody = table.find("tbody")
     if not tbody:
-        raise ValueError("No tbody found in the Next Bank exchange rates table")
+        raise ValueError("No tbody element found in the Next Bank exchange rates table")
 
     for row in tbody.find_all("tr"):
         cols = [td.get_text(strip=True) for td in row.find_all("td")]
@@ -60,7 +62,10 @@ def fetch_nextbank_rates() -> list[Rate]:
         else:
             # Try to extract 3-letter currency code if no parentheses
             match = re.search(r"\b([A-Z]{3})\b", currency_text)
-            currency_code = match.group(1) if match else currency_text.strip()
+            if not match:
+                # Skip rows without valid currency codes
+                continue
+            currency_code = match.group(1)
 
         rate = Rate(
             exchange=Exchange.NEXT,
