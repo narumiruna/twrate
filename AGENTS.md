@@ -22,6 +22,10 @@ uv sync
 
 # Add a new dependency
 uv add <package-name>
+
+# Run Python scripts or one-liners (ALWAYS use this instead of python3)
+uv run python script.py
+uv run python -c "import httpx; print(httpx.__version__)"
 ```
 
 **Why `uv`?**
@@ -29,6 +33,8 @@ uv add <package-name>
 - Automatic virtual environment management
 - Consistent across development, testing, and CI/CD
 - Lock file (`uv.lock`) ensures reproducible builds
+
+**Important:** Always use `uv run python` instead of `python3` or `python` when running scripts or testing code. This ensures you're using the correct environment with all dependencies properly loaded.
 
 ## Core Components
 
