@@ -1,5 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
+import asyncio
 
 import typer
 from loguru import logger
@@ -11,24 +10,33 @@ from .types import Exchange
 from .types import Rate
 
 
+async def fetch_all_rates() -> list[Rate]:
+    """Fetch rates from all exchanges in parallel using asyncio."""
+    rates: list[Rate] = []
+
+    # Create tasks for all exchanges
+    tasks = [fetch_rates(exchange) for exchange in Exchange]
+
+    # Gather results, handling exceptions
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for exchange, result in zip(Exchange, results, strict=False):
+        if isinstance(result, Exception):
+            logger.error(f"Error fetching {exchange.value}: {result}")
+        else:
+            rates.extend(result)
+
+    return rates
+
+
 def run(source_currency: str) -> None:
     """Query currency rates from various exchanges and display them in a table.
 
     Args:
         source_currency (str): The source currency to query rates for.
     """
-
-    rates: list[Rate] = []
-
-    # Fetch rates in parallel
-    with ThreadPoolExecutor() as executor:
-        futures = {executor.submit(fetch_rates, exchange): exchange for exchange in Exchange}
-        for future in as_completed(futures):
-            exchange = futures[future]
-            try:
-                rates.extend(future.result())
-            except Exception as e:
-                logger.error(f"Error fetching {exchange.value}: {e}")
+    # Fetch rates using asyncio
+    rates = asyncio.run(fetch_all_rates())
 
     # filter rates by source_currency
     rates = [rate for rate in rates if rate.source == source_currency.upper()]

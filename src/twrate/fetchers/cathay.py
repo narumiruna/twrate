@@ -86,31 +86,32 @@ def parse_currency_section(section) -> Rate | None:
     )
 
 
-def fetch_cathay_rates() -> list[Rate]:
+async def fetch_cathay_rates() -> list[Rate]:
     """Query Cathay United Bank exchange rates.
 
     Returns a list of Rate objects with the exchange rates for various currencies.
     """
     url = "https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/currency-billboard/"
 
-    resp = httpx.get(url, follow_redirects=True, timeout=30)
-    resp.raise_for_status()
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url, follow_redirects=True, timeout=30)
+        resp.raise_for_status()
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+        soup = BeautifulSoup(resp.text, "html.parser")
 
-    # Find all currency sections
-    currency_sections = soup.find_all("div", class_="cubre-o-table__item")
-    currency_sections = [
-        s for s in currency_sections if isinstance(classes := s.get("class"), list) and "currency" in classes
-    ]
+        # Find all currency sections
+        currency_sections = soup.find_all("div", class_="cubre-o-table__item")
+        currency_sections = [
+            s for s in currency_sections if isinstance(classes := s.get("class"), list) and "currency" in classes
+        ]
 
-    if not currency_sections:
-        raise ValueError("No currency sections found in the Cathay United Bank page")
+        if not currency_sections:
+            raise ValueError("No currency sections found in the Cathay United Bank page")
 
-    rates = []
-    for section in currency_sections:
-        rate = parse_currency_section(section)
-        if rate:
-            rates.append(rate)
+        rates = []
+        for section in currency_sections:
+            rate = parse_currency_section(section)
+            if rate:
+                rates.append(rate)
 
-    return rates
+        return rates

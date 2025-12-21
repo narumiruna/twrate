@@ -5,8 +5,9 @@ from twrate.types import Exchange
 
 
 @pytest.mark.parametrize("exchange", list(Exchange))
-def test_fetch_rates(exchange: Exchange) -> None:
-    rates = fetch_rates(exchange)
+@pytest.mark.asyncio
+async def test_fetch_rates(exchange: Exchange) -> None:
+    rates = await fetch_rates(exchange)
 
     assert isinstance(rates, list)
     assert len(rates) > 0

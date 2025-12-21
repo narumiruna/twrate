@@ -19,59 +19,61 @@ def _parse_rate(value: str) -> float | None:
         return None
 
 
-def fetch_kgi_rates() -> list[Rate]:
+async def fetch_kgi_rates() -> list[Rate]:
     """Query KGI Bank (凱基銀行) exchange rates by scraping the public page.
 
     Source: https://www.kgibank.com.tw/zh-tw/personal/interest-rate/fx
     """
     url = "https://www.kgibank.com.tw/zh-tw/personal/interest-rate/fx"
-    resp = httpx.get(url, follow_redirects=True)
-    resp.raise_for_status()
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url, follow_redirects=True)
+        resp.raise_for_status()
 
-    rates: list[Rate] = []
+        soup = BeautifulSoup(resp.text, "html.parser")
 
-    # Each desktop row contains a currency code span `.currency-en-name`
-    # and four numeric cells under `.kgibOtherCus004__item-val span`:
-    # [spot_buy, spot_sell, cash_buy, cash_sell]
-    for row in soup.select(".kgibOtherCus004__item"):
-        code_tag = row.select_one(".currency-en-name")
-        if not code_tag:
-            continue
+        rates: list[Rate] = []
 
-        source = code_tag.get_text(strip=True).upper()
+        # Each desktop row contains a currency code span `.currency-en-name`
+        # and four numeric cells under `.kgibOtherCus004__item-val span`:
+        # [spot_buy, spot_sell, cash_buy, cash_sell]
+        for row in soup.select(".kgibOtherCus004__item"):
+            code_tag = row.select_one(".currency-en-name")
+            if not code_tag:
+                continue
 
-        # Collect numeric values from the row while skipping textual labels
-        values: list[str] = []
-        for span in row.select(".kgibOtherCus004__item-val span"):
-            text = span.get_text(strip=True)
-            # Accept only numbers (with optional decimal) or dash
-            if re.fullmatch(r"-?|\d+(?:\.\d+)?", text):
-                values.append(text)
+            source = code_tag.get_text(strip=True).upper()
 
-        if len(values) < 4:
-            # Mobile layout duplicates entries; still ensure we have four numbers
-            continue
+            # Collect numeric values from the row while skipping textual labels
+            values: list[str] = []
+            for span in row.select(".kgibOtherCus004__item-val span"):
+                text = span.get_text(strip=True)
+                # Accept only numbers (with optional decimal) or dash
+                if re.fullmatch(r"-?|\d+(?:\.\d+)?", text):
+                    values.append(text)
 
-        spot_buy = _parse_rate(values[0])
-        spot_sell = _parse_rate(values[1])
-        cash_buy = _parse_rate(values[2])
-        cash_sell = _parse_rate(values[3])
+            if len(values) < 4:
+                # Mobile layout duplicates entries; still ensure we have four numbers
+                continue
 
-        rates.append(
-            Rate(
-                exchange=Exchange.KGI,
-                source=source,
-                target="TWD",
-                spot_buy=spot_buy,
-                spot_sell=spot_sell,
-                cash_buy=cash_buy,
-                cash_sell=cash_sell,
+            spot_buy = _parse_rate(values[0])
+            spot_sell = _parse_rate(values[1])
+            cash_buy = _parse_rate(values[2])
+            cash_sell = _parse_rate(values[3])
+
+            rates.append(
+                Rate(
+                    exchange=Exchange.KGI,
+                    source=source,
+                    target="TWD",
+                    spot_buy=spot_buy,
+                    spot_sell=spot_sell,
+                    cash_buy=cash_buy,
+                    cash_sell=cash_sell,
+                )
             )
-        )
 
-    if not rates:
-        raise ValueError("No KGI rates parsed from page")
+        if not rates:
+            raise ValueError("No KGI rates parsed from page")
 
-    return rates
+        return rates
