@@ -1,5 +1,4 @@
 import httpx
-from loguru import logger
 
 from ..types import Exchange
 from ..types import Rate
@@ -63,5 +62,4 @@ async def fetch_nextbank_rates() -> list[Rate]:
         if not rates:
             raise ValueError("No valid Next Bank rates parsed from API response")
 
-        logger.info("Parsed {:12s} rates for currencies: {}", "NEXT", [r.source for r in rates])
         return rates
