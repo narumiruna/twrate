@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 
 import typer
+from loguru import logger
 from rich import print
 from tabulate import tabulate
 
@@ -27,7 +28,7 @@ def run(source_currency: str) -> None:
             try:
                 rates.extend(future.result())
             except Exception as e:
-                print(f"[red]Error fetching {exchange.value}: {e}[/red]")
+                logger.error(f"Error fetching {exchange.value}: {e}")
 
     # filter rates by source_currency
     rates = [rate for rate in rates if rate.source == source_currency.upper()]
