@@ -1,6 +1,7 @@
 from loguru import logger
 
 from .fetchers.bot import fetch_bot_rates
+from .fetchers.cathay import fetch_cathay_rates
 from .fetchers.dbs import fetch_dbs_rates
 from .fetchers.esun import fetch_esun_rates
 from .fetchers.hsbc import fetch_hsbc_rates
@@ -31,5 +32,7 @@ def fetch_rates(exchange: Exchange) -> list[Rate]:
             return fetch_nextbank_rates()
         case Exchange.KGI:
             return fetch_kgi_rates()
+        case Exchange.CATHAY:
+            return fetch_cathay_rates()
         case _:
             raise ValueError(f"Unsupported exchange: {exchange}")

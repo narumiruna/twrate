@@ -72,6 +72,7 @@ Defines supported banks:
 - `HSBC`: HSBC Bank Taiwan (匯豐銀行)
 - `NEXT`: Next Bank (將來銀行)
 - `KGI`: KGI Bank (凱基銀行)
+- `CATHAY`: Cathay United Bank (國泰世華銀行)
 
 ## Fetcher Agents
 
@@ -204,6 +205,25 @@ Each fetcher agent implements a `fetch_*_rates()` function that returns a `list[
 - Defensive column access with length checks
 - Descriptive error messages for debugging
 
+### 8. Cathay United Bank Fetcher (`cathay.py`)
+
+**Data Source**: HTML scraping
+**URL**: `https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/currency-billboard/`
+**Format**: HTML
+
+**Implementation Details:**
+- Uses BeautifulSoup for HTML parsing
+- Extracts currency sections from `div.cubre-o-table__item.currency` containers
+- Parses currency code from `div.cubre-m-currency__name` (format: "美元USD")
+- Extracts spot and cash rates from table rows
+- Handles missing rates with dash ("--") placeholder
+
+**Key Features:**
+- Clean HTML structure with well-defined CSS classes
+- Supports 16+ currencies
+- Simple table parsing with clear row identification ("即期匯率", "現鈕匯率")
+- Data available in initial HTML (no JavaScript rendering required)
+
 ## Fetcher Selection (`fetcher.py`)
 
 The `fetch_rates()` function acts as a dispatcher:
@@ -225,6 +245,8 @@ def fetch_rates(exchange: Exchange) -> list[Rate]:
             return fetch_hsbc_rates()
         case Exchange.NEXT:
             return fetch_nextbank_rates()
+        case Exchange.CATHAY:
+            return fetch_cathay_rates()
 ```
 
 ## Adding New Fetchers
