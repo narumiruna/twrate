@@ -1,4 +1,7 @@
+import asyncio
+
 import typer
+from loguru import logger
 from rich import print
 from tabulate import tabulate
 
@@ -7,16 +10,23 @@ from .types import Exchange
 from .types import Rate
 
 
-def run(source_currency: str) -> None:
+async def run_async(source_currency: str) -> None:
     """Query currency rates from various exchanges and display them in a table.
 
     Args:
         source_currency (str): The source currency to query rates for.
     """
 
+    # Fetch all rates concurrently
+    tasks = [fetch_rates(exchange) for exchange in Exchange]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
     rates: list[Rate] = []
-    for exchange in Exchange:
-        rates += fetch_rates(exchange)
+    for exchange, result in zip(Exchange, results, strict=False):
+        if isinstance(result, Exception):
+            logger.error(f"Failed to fetch rates from {exchange.name}: {result}")
+        elif isinstance(result, list):
+            rates.extend(result)
 
     # filter rates by source_currency
     rates = [rate for rate in rates if rate.source == source_currency.upper()]
@@ -56,6 +66,11 @@ def run(source_currency: str) -> None:
             stralign="right",
         )
     )
+
+
+def run(source_currency: str) -> None:
+    """Synchronous wrapper for run_async."""
+    asyncio.run(run_async(source_currency))
 
 
 def main() -> None:

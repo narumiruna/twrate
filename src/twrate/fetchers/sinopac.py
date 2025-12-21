@@ -78,7 +78,7 @@ def merge_rates(*, remit_rates: list[Rate], cash_rates: list[Rate]) -> list[Rate
     return list(result.values())
 
 
-def fetch_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "all") -> list[Rate]:
+async def fetch_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "all") -> list[Rate]:
     """Query SinoPac exchange rates.
 
     Args:
@@ -87,40 +87,43 @@ def fetch_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "all") 
     Returns a list of Rate objects with the exchange rates for various currencies.
     """
     if exchange_type == "all":
+        remit_rates = await fetch_sinopac_rates("remit")
+        cash_rates = await fetch_sinopac_rates("cash")
         return merge_rates(
-            remit_rates=fetch_sinopac_rates("remit"),
-            cash_rates=fetch_sinopac_rates("cash"),
+            remit_rates=remit_rates,
+            cash_rates=cash_rates,
         )
 
     ts = int(datetime.now().timestamp() * 1000)
     url = f"https://m.sinopac.com/ws/share/rate/ws_exchange.ashx?{ts}"
 
-    resp = httpx.post(url, data={"exchangeType": exchange_type.upper()})
-    resp.raise_for_status()
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(url, data={"exchangeType": exchange_type.upper()})
+        resp.raise_for_status()
 
-    data = [SinopacRateResponse.model_validate(item) for item in resp.json()]
-    if len(data) != 1:
-        raise ValueError("Failed to parse response")
+        data = [SinopacRateResponse.model_validate(item) for item in resp.json()]
+        if len(data) != 1:
+            raise ValueError("Failed to parse response")
 
-    if data[0].header != "SUCCESS":
-        raise ValueError("Failed to query rates")
+        if data[0].header != "SUCCESS":
+            raise ValueError("Failed to query rates")
 
-    rates = []
-    for item in data[0].sub_info:
-        rate = Rate(
-            exchange=Exchange.SINOPAC,
-            source=item.data_value4,
-            target="TWD",
-        )
-        match exchange_type:
-            case "remit":
-                rate.spot_buy = item.data_value2
-                rate.spot_sell = item.data_value3
-            case "cash":
-                rate.cash_buy = item.data_value2
-                rate.cash_sell = item.data_value3
-            case _:
-                raise ValueError(f"Invalid exchange type: {exchange_type}")
-        rates.append(rate)
+        rates = []
+        for item in data[0].sub_info:
+            rate = Rate(
+                exchange=Exchange.SINOPAC,
+                source=item.data_value4,
+                target="TWD",
+            )
+            match exchange_type:
+                case "remit":
+                    rate.spot_buy = item.data_value2
+                    rate.spot_sell = item.data_value3
+                case "cash":
+                    rate.cash_buy = item.data_value2
+                    rate.cash_sell = item.data_value3
+                case _:
+                    raise ValueError(f"Invalid exchange type: {exchange_type}")
+            rates.append(rate)
 
-    return rates
+        return rates

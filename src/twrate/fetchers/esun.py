@@ -53,24 +53,25 @@ class EsunRateResponse(BaseModel):
     clear: int = Field(..., validation_alias="Clear")
 
 
-def fetch_esun_rates() -> list[Rate]:
+async def fetch_esun_rates() -> list[Rate]:
     url = "https://www.esunbank.com/api/client/ExchangeRate/LastRateInfo"
 
-    resp = httpx.post(url)
-    resp.raise_for_status()
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(url)
+        resp.raise_for_status()
 
-    data = EsunRateResponse.model_validate(resp.json())
+        data = EsunRateResponse.model_validate(resp.json())
 
-    rates = []
-    for r in data.rates:
-        rate = Rate(
-            exchange=Exchange.ESUN,
-            source=r.ccy.split("/")[0].upper(),
-            target=r.ccy.split("/")[1].upper(),
-            spot_buy=r.b_board_rate,
-            spot_sell=r.s_board_rate,
-            cash_buy=r.cash_b_board_rate,
-            cash_sell=r.cash_s_board_rate,
-        )
-        rates.append(rate)
-    return rates
+        rates = []
+        for r in data.rates:
+            rate = Rate(
+                exchange=Exchange.ESUN,
+                source=r.ccy.split("/")[0].upper(),
+                target=r.ccy.split("/")[1].upper(),
+                spot_buy=r.b_board_rate,
+                spot_sell=r.s_board_rate,
+                cash_buy=r.cash_b_board_rate,
+                cash_sell=r.cash_s_board_rate,
+            )
+            rates.append(rate)
+        return rates
