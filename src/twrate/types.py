@@ -13,6 +13,7 @@ class Exchange(str, Enum):
     BOT = "BANK_OF_TAIWAN"
     ESUN = "ESUN_BANK"
     LINE = "LINE_BANK"
+    HSBC = "HSBC_BANK"
 
     def __str__(self) -> str:
         return self.value
