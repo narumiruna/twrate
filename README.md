@@ -12,6 +12,7 @@ A Python package for querying real-time exchange rates from major Taiwanese bank
 - E.SUN Bank (玉山銀行)
 - Line Bank (LINE Bank)
 - HSBC Bank Taiwan (匯豐銀行)
+- Next Bank (將來銀行)
 
 ## Installation
 
@@ -71,7 +72,7 @@ See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
-Contributions are welcome! Currently, the package supports Bank of Taiwan, DBS Bank, Sinopac Bank, E.SUN Bank, Line Bank, and HSBC Bank, but you can help extend the functionality to cover more Taiwanese banks.
+Contributions are welcome! Currently, the package supports Bank of Taiwan, DBS Bank, Sinopac Bank, E.SUN Bank, Line Bank, HSBC Bank, and Next Bank, but you can help extend the functionality to cover more Taiwanese banks.
 
 ## TODO
 
@@ -80,3 +81,4 @@ Support for additional Taiwanese banks:
 - [ ] 將來銀行 (Next Bank) - https://www.nextbank.com.tw/exchange-rates
 - [ ] 台新銀行 (Taishin Bank) - https://www.taishinbank.com.tw/TSB/personal/deposit/lookup/realtime/
 - [ ] 凱基銀行 (KGI Bank) - https://www.kgibank.com.tw/zh-tw/personal/interest-rate/fx
+

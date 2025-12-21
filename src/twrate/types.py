@@ -14,6 +14,7 @@ class Exchange(str, Enum):
     ESUN = "ESUN_BANK"
     LINE = "LINE_BANK"
     HSBC = "HSBC_BANK"
+    NEXT = "NEXT_BANK"
 
     def __str__(self) -> str:
         return self.value
