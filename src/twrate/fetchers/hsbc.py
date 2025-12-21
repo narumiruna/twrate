@@ -7,6 +7,15 @@ from ..types import Exchange
 from ..types import Rate
 
 
+def parse_rate(value: str) -> float | None:
+    if not value or value == "-":
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
 def fetch_hsbc_rates() -> list[Rate]:
     """Query HSBC Taiwan exchange rates.
 
@@ -18,14 +27,6 @@ def fetch_hsbc_rates() -> list[Rate]:
     resp.raise_for_status()
 
     soup = BeautifulSoup(resp.text, "html.parser")
-
-    def parse_rate(value: str) -> float | None:
-        if not value or value == "-":
-            return None
-        try:
-            return float(value)
-        except ValueError:
-            return None
 
     rates = []
     table = soup.find("table")
