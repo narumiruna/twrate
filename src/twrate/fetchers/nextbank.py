@@ -1,7 +1,5 @@
-import re
-
 import httpx
-from bs4 import BeautifulSoup
+from loguru import logger
 
 from ..types import Exchange
 from ..types import Rate
@@ -25,53 +23,44 @@ def parse_rate(value: str) -> float | None:
 
 
 def fetch_nextbank_rates() -> list[Rate]:
-    """Query Next Bank (將來銀行) Taiwan exchange rates.
+    """Query Next Bank (將來銀行) Taiwan exchange rates via public API."""
 
-    Returns a list of Rate objects with the exchange rates for various currencies.
-    """
-    url = "https://www.nextbank.com.tw/exchange-rates"
+    api_url = "https://api.nextbank.com.tw/ap6/open/forex/v1.0/GetFXRate"
 
-    resp = httpx.get(url, follow_redirects=True)
+    resp = httpx.post(api_url, json={}, follow_redirects=True)
     resp.raise_for_status()
 
-    soup = BeautifulSoup(resp.text, "html.parser")
-
-    rates = []
-    table = soup.find("table")
-
-    if not table:
+    data = resp.json()
+    currency_list = data.get("data", {}).get("currencyList")
+    if not currency_list:
         raise ValueError(
-            "No exchange rates table found in the Next Bank page at https://www.nextbank.com.tw/exchange-rates"
+            "No exchange rates returned from Next Bank API at https://api.nextbank.com.tw/ap6/open/forex/v1.0/GetFXRate"
         )
 
-    tbody = table.find("tbody")
-    if not tbody:
-        raise ValueError("No tbody element found in the Next Bank exchange rates table")
+    rates: list[Rate] = []
+    for item in currency_list:
+        currency_code = item.get("currency")
+        buy_rate = parse_rate(item.get("buyRate"))
+        sell_rate = parse_rate(item.get("sellRate"))
 
-    for row in tbody.find_all("tr"):
-        cols = [td.get_text(strip=True) for td in row.find_all("td")]
-        if not cols or len(cols) < 5:
+        if not currency_code:
             continue
 
-        # Extract currency code from the first column
-        # Format is typically "Currency Name (CODE)" or just "CODE"
-        currency_text = cols[0]
-        # Try to match either "(CODE)" or standalone "CODE"
-        match = re.search(r"\(([A-Z]{3})\)|\b([A-Z]{3})\b", currency_text)
-        if not match:
-            # Skip rows without valid currency codes
-            continue
-        currency_code = match.group(1) or match.group(2)
-
-        rate = Rate(
-            exchange=Exchange.NEXT,
-            source=currency_code,
-            target="TWD",
-            spot_buy=parse_rate(cols[1]),
-            spot_sell=parse_rate(cols[2]),
-            cash_buy=parse_rate(cols[3]),
-            cash_sell=parse_rate(cols[4]),
+        # API returns buyRate as bank sells to customer, so swap to our Spot Buy/Sell semantics.
+        rates.append(
+            Rate(
+                exchange=Exchange.NEXT,
+                source=currency_code,
+                target="TWD",
+                spot_buy=sell_rate,
+                spot_sell=buy_rate,
+                cash_buy=None,
+                cash_sell=None,
+            )
         )
-        rates.append(rate)
 
+    if not rates:
+        raise ValueError("No valid Next Bank rates parsed from API response")
+
+    logger.info("Parsed Next Bank rates for currencies: {}", [r.source for r in rates])
     return rates
