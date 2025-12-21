@@ -26,13 +26,51 @@ pip install twrate
 ### Basic Usage
 
 ```python
+import asyncio
+
 from rich import print
 
 from twrate import Exchange
 from twrate import fetch_rates
 
-for exchange in Exchange:
-    print(fetch_rates(exchange))
+
+async def main():
+    for exchange in Exchange:
+        rates = await fetch_rates(exchange)
+        print(rates)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+Or fetch rates from all exchanges concurrently:
+
+```python
+import asyncio
+
+from twrate import Exchange
+from twrate import fetch_rates
+
+
+async def main():
+    # Fetch all rates concurrently
+    tasks = [fetch_rates(exchange) for exchange in Exchange]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    all_rates = []
+    for exchange, result in zip(Exchange, results, strict=False):
+        if isinstance(result, Exception):
+            print(f"Error fetching {exchange.value}: {result}")
+        else:
+            all_rates.extend(result)
+
+    return all_rates
+
+
+if __name__ == "__main__":
+    rates = asyncio.run(main())
+    print(rates)
 ```
 
 ### Command-Line Interface
