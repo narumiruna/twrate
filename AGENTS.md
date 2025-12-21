@@ -221,7 +221,7 @@ Each fetcher agent implements a `fetch_*_rates()` function that returns a `list[
 **Key Features:**
 - Clean HTML structure with well-defined CSS classes
 - Supports 16+ currencies
-- Simple table parsing with clear row identification ("即期匯率", "現鈕匯率")
+- Simple table parsing with clear row identification ("即期匯率", "現鈔匯率")
 - Data available in initial HTML (no JavaScript rendering required)
 
 ## Fetcher Selection (`fetcher.py`)
