@@ -16,6 +16,7 @@ class Exchange(str, Enum):
     HSBC = "HSBC_BANK"
     NEXT = "NEXT_BANK"
     KGI = "KGI_BANK"
+    CATHAY = "CATHAY_BANK"
 
     def __str__(self) -> str:
         return self.value
