@@ -16,7 +16,7 @@ def run(source_currency: str) -> None:
 
     rates: list[Rate] = []
     for exchange in Exchange:
-        rates += fetch_rates(exchange)
+        rates.extend(fetch_rates(exchange))
 
     # filter rates by source_currency
     rates = [rate for rate in rates if rate.source == source_currency.upper()]
