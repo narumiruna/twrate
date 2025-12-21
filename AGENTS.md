@@ -2,7 +2,7 @@
 
 ## Overview
 
-`twrate` implements a fetcher-based architecture where each agent (fetcher) is responsible for retrieving exchange rate data from a specific Taiwanese bank. The system uses a consistent data model (`Rate`) across all fetchers, enabling seamless integration and comparison of rates from different sources.
+`twrate` implements a fetcher-based architecture where each agent (fetcher) is responsible for retrieving exchange rate data from a specific Taiwanese bank. Fetchers are asynchronous coroutines and run in parallel, giving fast fan-out across sources. The system uses a consistent data model (`Rate`) across all fetchers, enabling seamless integration and comparison of rates from different sources.
 
 ## Development Workflow
 
@@ -45,13 +45,13 @@ The `Rate` class is the central data structure that standardizes exchange rate i
 ```python
 class Rate(BaseModel):
     exchange: Exchange          # Bank identifier
-    source: str                # Source currency code
-    target: str                # Target currency (typically "TWD")
-    spot_buy: float | None     # Bank's buying rate for spot transactions
-    spot_sell: float | None    # Bank's selling rate for spot transactions
-    cash_buy: float | None     # Bank's buying rate for cash transactions
-    cash_sell: float | None    # Bank's selling rate for cash transactions
-    fetched_at: datetime       # Timestamp of fetch operation
+    source: str                 # Source currency code
+    target: str                 # Target currency (typically "TWD")
+    spot_buy: float | None      # Bank's buying rate for spot transactions
+    spot_sell: float | None     # Bank's selling rate for spot transactions
+    cash_buy: float | None      # Bank's buying rate for cash transactions
+    cash_sell: float | None     # Bank's selling rate for cash transactions
+    fetched_at: datetime        # Timestamp of fetch operation
 ```
 
 **Computed Properties:**
@@ -76,12 +76,13 @@ Defines supported banks:
 
 ## Fetcher Agents
 
-Each fetcher agent implements a `fetch_*_rates()` function that returns a `list[Rate]`. The architecture follows these principles:
+Each fetcher agent implements an `async def fetch_*_rates()` coroutine that resolves to a `list[Rate]`. The architecture follows these principles:
 
 1. **Single Responsibility**: Each fetcher handles one bank only
 2. **Consistent Interface**: All fetchers return `list[Rate]`
 3. **Error Handling**: HTTP errors propagate via `httpx.raise_for_status()`
 4. **Data Validation**: Use Pydantic models for response parsing
+5. **Async First**: Use `httpx.AsyncClient` and `asyncio.gather()` for concurrent fan-out
 
 ### 1. Bank of Taiwan Fetcher (`bot.py`)
 
@@ -205,7 +206,23 @@ Each fetcher agent implements a `fetch_*_rates()` function that returns a `list[
 - Defensive column access with length checks
 - Descriptive error messages for debugging
 
-### 8. Cathay United Bank Fetcher (`cathay.py`)
+### 8. KGI Bank Fetcher (`kgi.py`)
+
+**Data Source**: HTML scraping
+**URL**: `https://www.kgibank.com.tw/zh-tw/personal/interest-rate/fx`
+**Format**: HTML
+
+**Implementation Details:**
+- Scrapes desktop and mobile table layouts using CSS selectors
+- Parses four numeric columns per currency: spot buy/sell and cash buy/sell
+- Accepts dashes as missing values; validates currency code presence
+
+**Key Features:**
+- Async HTTP requests with `httpx.AsyncClient`
+- Regex guards to keep only numeric or dash cells
+- Raises when no rates are parsed to surface page shape changes
+
+### 9. Cathay United Bank Fetcher (`cathay.py`)
 
 **Data Source**: HTML scraping
 **URL**: `https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/currency-billboard/`
@@ -229,24 +246,28 @@ Each fetcher agent implements a `fetch_*_rates()` function that returns a `list[
 The `fetch_rates()` function acts as a dispatcher:
 
 ```python
-def fetch_rates(exchange: Exchange) -> list[Rate]:
+async def fetch_rates(exchange: Exchange) -> list[Rate]:
     match exchange:
         case Exchange.SINOPAC:
-            return fetch_sinopac_rates()
+            return await fetch_sinopac_rates()
         case Exchange.ESUN:
-            return fetch_esun_rates()
+            return await fetch_esun_rates()
         case Exchange.LINE:
-            return fetch_line_rates()
+            return await fetch_line_rates()
         case Exchange.BOT:
-            return fetch_bot_rates()
+            return await fetch_bot_rates()
         case Exchange.DBS:
-            return fetch_dbs_rates()
+            return await fetch_dbs_rates()
         case Exchange.HSBC:
-            return fetch_hsbc_rates()
+            return await fetch_hsbc_rates()
         case Exchange.NEXT:
-            return fetch_nextbank_rates()
+            return await fetch_nextbank_rates()
+        case Exchange.KGI:
+            return await fetch_kgi_rates()
         case Exchange.CATHAY:
-            return fetch_cathay_rates()
+            return await fetch_cathay_rates()
+        case _:
+            raise ValueError(f"Unsupported exchange: {exchange}")
 ```
 
 ## Adding New Fetchers
@@ -255,12 +276,12 @@ To add support for a new bank:
 
 1. **Create fetcher module** in `src/twrate/fetchers/`
 2. **Add Exchange enum value** in `types.py`
-3. **Implement `fetch_*_rates()`** following the pattern:
-   - Accept no parameters
-   - Return `list[Rate]`
-   - Handle HTTP requests with `httpx`
-   - Parse response to `Rate` objects
-   - Use Pydantic for complex JSON structures
+3. **Implement `async def fetch_*_rates()`** following the pattern:
+    - Accept no parameters
+    - Return `list[Rate]`
+    - Handle HTTP requests with `httpx.AsyncClient`
+    - Parse response to `Rate` objects
+    - Use Pydantic for complex JSON structures
 4. **Update dispatcher** in `fetcher.py`
 5. **Add test cases** in `tests/`
 
@@ -270,24 +291,26 @@ To add support for a new bank:
 import httpx
 from ..types import Exchange, Rate
 
-def fetch_example_rates() -> list[Rate]:
+async def fetch_example_rates() -> list[Rate]:
     url = "https://example.bank.com/api/rates"
-    resp = httpx.get(url)
-    resp.raise_for_status()
 
-    # Parse response and convert to Rate objects
-    rates = []
-    for item in resp.json():
-        rate = Rate(
-            exchange=Exchange.EXAMPLE,
-            source=item["currency"],
-            target="TWD",
-            spot_buy=item["buy"],
-            spot_sell=item["sell"],
-            cash_buy=item.get("cash_buy"),
-            cash_sell=item.get("cash_sell"),
-        )
-        rates.append(rate)
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url)
+        resp.raise_for_status()
+
+        # Parse response and convert to Rate objects
+        rates = []
+        for item in resp.json():
+            rate = Rate(
+                exchange=Exchange.EXAMPLE,
+                source=item["currency"],
+                target="TWD",
+                spot_buy=item["buy"],
+                spot_sell=item["sell"],
+                cash_buy=item.get("cash_buy"),
+                cash_sell=item.get("cash_sell"),
+            )
+            rates.append(rate)
 
     return rates
 ```
@@ -422,7 +445,7 @@ print('USD in response:', '美元USD' in resp.text)  # False
 **Current Status:**
 - Fetcher code exists but returns empty results
 - Error is logged but doesn't crash the application
-- Other 7 banks continue to function normally
+- Other supported banks continue to function normally
 
 **Lessons for Future Implementations:**
 
@@ -478,12 +501,12 @@ def evaluate_data_source(url: str) -> str:
 
 Potential improvements for the agent architecture:
 
-1. **Async Support**: Convert fetchers to async/await pattern
-2. **Retry Logic**: Add exponential backoff for failed requests
-3. **Caching Layer**: Implement response caching with TTL
-4. **Rate Limiting**: Add per-bank rate limit enforcement
-5. **Health Checks**: Monitor API availability
-6. **Historical Data**: Support time-series rate retrieval
-7. **Webhook Support**: Real-time rate updates
-8. **Multi-Currency**: Support non-TWD target currencies
-9. **Optional Browser Automation**: Add Playwright as optional dependency for JS-heavy sites
+1. **Retry Logic**: Add exponential backoff for failed requests
+2. **Caching Layer**: Implement response caching with TTL
+3. **Rate Limiting**: Add per-bank rate limit enforcement
+4. **Health Checks**: Monitor API availability
+5. **Historical Data**: Support time-series rate retrieval
+6. **Webhook Support**: Real-time rate updates
+7. **Multi-Currency**: Support non-TWD target currencies
+8. **Optional Browser Automation**: Add Playwright as optional dependency for JS-heavy sites
+9. **Timeouts & Cancellation**: Add client timeouts, cancellation, and structured error propagation

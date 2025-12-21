@@ -4,7 +4,7 @@ A Python package for querying real-time exchange rates from major Taiwanese bank
 
 ## Overview
 
-`twrate` provides a simple and efficient way to retrieve up-to-date currency exchange rates from Taiwanese banks. Currently, it supports the following banks:
+`twrate` provides a simple and efficient way to retrieve up-to-date currency exchange rates from Taiwanese banks using asynchronous fetchers and concurrent fan-out. Currently, it supports the following banks:
 
 - Bank of Taiwan (台灣銀行)
 - DBS Bank Taiwan (星展銀行)
@@ -14,12 +14,15 @@ A Python package for querying real-time exchange rates from major Taiwanese bank
 - HSBC Bank Taiwan (匯豐銀行)
 - Next Bank (將來銀行)
 - KGI Bank (凱基銀行)
+- Cathay United Bank (國泰世華銀行)
 
 ## Installation
 
 ```bash
 pip install twrate
 ```
+
+> Requires Python 3.12+. For local development, prefer `uv` (e.g., `uv sync` to install and `uv run twrate USD` to execute the CLI inside the managed environment).
 
 ## Usage
 
@@ -78,8 +81,14 @@ if __name__ == "__main__":
 You can also use `twrate` directly from the command line:
 
 ```bash
-# Query exchange rates for USD from all supported banks
+# Query exchange rates for USD from all supported banks (installed via pip)
 twrate USD
+
+# Run inside the uv-managed environment when developing locally
+uv run twrate USD
+
+# Or run without installing into the current environment
+uvx twrate USD
 ```
 
 Example output:
@@ -104,6 +113,10 @@ The `Rate` object provides the following information:
 - `cash_buy`: The bank's buying rate for cash transactions
 - `cash_sell`: The bank's selling rate for cash transactions
 - `spot_mid`: A calculated property that returns the mid-rate between spot buy and sell
+- `cash_mid`: A calculated property that returns the mid-rate between cash buy and sell
+- `spot_spread`: Relative spread for spot transactions
+- `cash_spread`: Relative spread for cash transactions
+- `symbol`: Formatted currency pair string (e.g., `USD/TWD`)
 
 ## License
 
@@ -111,7 +124,7 @@ See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
-Contributions are welcome! Currently, the package supports Bank of Taiwan, DBS Bank, Sinopac Bank, E.SUN Bank, Line Bank, HSBC Bank, Next Bank, and KGI Bank, but you can help extend the functionality to cover more Taiwanese banks.
+Contributions are welcome! The package currently supports Bank of Taiwan, DBS Bank, Sinopac Bank, E.SUN Bank, Line Bank, HSBC Bank, Next Bank, KGI Bank, and Cathay United Bank; you can help extend the functionality to cover more Taiwanese banks.
 
 ### Development
 
