@@ -19,9 +19,7 @@ def parse_rate(value: str) -> float | None:
     if not value or value == "-":
         return None
     try:
-        # Remove any commas or whitespace
-        cleaned = value.replace(",", "").strip()
-        return float(cleaned)
+        return float(value)
     except ValueError:
         return None
 
@@ -68,8 +66,8 @@ def fetch_nextbank_rates() -> list[Rate]:
             exchange=Exchange.NEXT,
             source=currency_code,
             target="TWD",
-            spot_buy=parse_rate(cols[1]),
-            spot_sell=parse_rate(cols[2]),
+            spot_buy=parse_rate(cols[1]) if len(cols) > 1 else None,
+            spot_sell=parse_rate(cols[2]) if len(cols) > 2 else None,
             cash_buy=parse_rate(cols[3]) if len(cols) > 3 else None,
             cash_sell=parse_rate(cols[4]) if len(cols) > 4 else None,
         )
