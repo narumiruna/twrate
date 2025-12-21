@@ -1,6 +1,5 @@
 import os
 import sys
-from typing import Any
 from typing import Final
 from typing import cast
 
