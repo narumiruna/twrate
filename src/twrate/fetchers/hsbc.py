@@ -19,6 +19,14 @@ def fetch_hsbc_rates() -> list[Rate]:
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
+    def parse_rate(value: str) -> float | None:
+        if not value or value == "-":
+            return None
+        try:
+            return float(value)
+        except ValueError:
+            return None
+
     rates = []
     table = soup.find("table")
 
@@ -39,14 +47,6 @@ def fetch_hsbc_rates() -> list[Rate]:
         currency_text = cols[0]
         match = re.search(r"\(([A-Z]{3})\)", currency_text)
         currency_code = match.group(1) if match else currency_text.strip()
-
-        def parse_rate(value: str) -> float | None:
-            if not value or value == "-":
-                return None
-            try:
-                return float(value)
-            except ValueError:
-                return None
 
         rate = Rate(
             exchange=Exchange.HSBC,
