@@ -56,25 +56,21 @@ def fetch_nextbank_rates() -> list[Rate]:
         # Extract currency code from the first column
         # Format is typically "Currency Name (CODE)" or just "CODE"
         currency_text = cols[0]
-        match = re.search(r"\(([A-Z]{3})\)", currency_text)
-        if match:
-            currency_code = match.group(1)
-        else:
-            # Try to extract 3-letter currency code if no parentheses
-            match = re.search(r"\b([A-Z]{3})\b", currency_text)
-            if not match:
-                # Skip rows without valid currency codes
-                continue
-            currency_code = match.group(1)
+        # Try to match either "(CODE)" or standalone "CODE"
+        match = re.search(r"\(([A-Z]{3})\)|\b([A-Z]{3})\b", currency_text)
+        if not match:
+            # Skip rows without valid currency codes
+            continue
+        currency_code = match.group(1) or match.group(2)
 
         rate = Rate(
             exchange=Exchange.NEXT,
             source=currency_code,
             target="TWD",
-            spot_buy=parse_rate(cols[1]) if len(cols) > 1 else None,
-            spot_sell=parse_rate(cols[2]) if len(cols) > 2 else None,
-            cash_buy=parse_rate(cols[3]) if len(cols) > 3 else None,
-            cash_sell=parse_rate(cols[4]) if len(cols) > 4 else None,
+            spot_buy=parse_rate(cols[1]),
+            spot_sell=parse_rate(cols[2]),
+            cash_buy=parse_rate(cols[3]),
+            cash_sell=parse_rate(cols[4]),
         )
         rates.append(rate)
 
