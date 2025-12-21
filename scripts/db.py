@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 
 from dotenv import find_dotenv
@@ -72,18 +73,32 @@ class RateWriter:
         self.write_api.write(bucket=self.bucket, org=self.org, record=points)
 
 
+async def fetch_all_rates() -> list[Rate]:
+    """Fetch rates from all exchanges in parallel."""
+    rates: list[Rate] = []
+
+    # Create tasks for all exchanges
+    tasks = [fetch_rates(exchange) for exchange in Exchange]
+
+    # Gather results, handling exceptions
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for exchange, result in zip(Exchange, results, strict=False):
+        if isinstance(result, Exception):
+            logger.error("Error fetching rates from {}: {}", exchange.name, result)
+        else:
+            rates.extend(result)
+
+    return rates
+
+
 def main() -> None:
     load_dotenv(find_dotenv())
 
     writer = RateWriter.from_env()
 
-    rates = []
-    for exchange in Exchange:
-        try:
-            rates.extend(fetch_rates(exchange))
-        except Exception as e:
-            logger.error("Error fetching rates from {}: {}", exchange.name, e)
-            continue
+    # Fetch all rates using asyncio
+    rates = asyncio.run(fetch_all_rates())
 
     writer.write_rates(rates)
 

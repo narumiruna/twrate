@@ -71,8 +71,9 @@ class DBSRateResponse(BaseModel):
         return rates
 
 
-def fetch_dbs_rates() -> list[Rate]:
+async def fetch_dbs_rates() -> list[Rate]:
     url = "https://www.dbs.com.tw/tw-rates-api/v1/api/twrates/latestForexRates"
-    resp = httpx.get(url=url)
-    resp.raise_for_status()
-    return DBSRateResponse.model_validate(resp.json()).to_rates()
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url=url)
+        resp.raise_for_status()
+        return DBSRateResponse.model_validate(resp.json()).to_rates()

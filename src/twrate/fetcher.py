@@ -13,26 +13,26 @@ from .types import Exchange
 from .types import Rate
 
 
-def fetch_rates(exchange: Exchange) -> list[Rate]:
-    logger.info("Fetching rates from {}", exchange.name)
+async def fetch_rates(exchange: Exchange) -> list[Rate]:
+    logger.info("Fetching rates from {:12s}", exchange.name)
     match exchange:
         case Exchange.SINOPAC:
-            return fetch_sinopac_rates()
+            return await fetch_sinopac_rates()
         case Exchange.ESUN:
-            return fetch_esun_rates()
+            return await fetch_esun_rates()
         case Exchange.LINE:
-            return fetch_line_rates()
+            return await fetch_line_rates()
         case Exchange.BOT:
-            return fetch_bot_rates()
+            return await fetch_bot_rates()
         case Exchange.DBS:
-            return fetch_dbs_rates()
+            return await fetch_dbs_rates()
         case Exchange.HSBC:
-            return fetch_hsbc_rates()
+            return await fetch_hsbc_rates()
         case Exchange.NEXT:
-            return fetch_nextbank_rates()
+            return await fetch_nextbank_rates()
         case Exchange.KGI:
-            return fetch_kgi_rates()
+            return await fetch_kgi_rates()
         case Exchange.CATHAY:
-            return fetch_cathay_rates()
+            return await fetch_cathay_rates()
         case _:
             raise ValueError(f"Unsupported exchange: {exchange}")

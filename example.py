@@ -1,13 +1,16 @@
+import asyncio
+
 from rich import print
 
 from twrate import Exchange
 from twrate import fetch_rates
 
 
-def main() -> None:
+async def main() -> None:
     for exchange in Exchange:
-        print(fetch_rates(exchange))
+        rates = await fetch_rates(exchange)
+        print(rates)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
