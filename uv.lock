@@ -542,9 +542,6 @@ dev = [
     { name = "python-dotenv" },
     { name = "ruff" },
     { name = "ty" },
-    { name = "types-python-dateutil" },
-    { name = "types-setuptools" },
-    { name = "types-tabulate" },
 ]
 
 [package.metadata]
@@ -568,9 +565,6 @@ dev = [
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "ruff", specifier = ">=0.14.14" },
     { name = "ty", specifier = ">=0.0.13" },
-    { name = "types-python-dateutil", specifier = ">=2.9.0.20260124" },
-    { name = "types-setuptools", specifier = ">=80.10.0.20260124" },
-    { name = "types-tabulate", specifier = ">=0.9.0.20241207" },
 ]
 
 [[package]]
@@ -610,33 +604,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/36/bf/8825b5929afd84d0dabd606c67cd57b8388cb3ec385f7ef19c5cc2202069/typer-0.21.1.tar.gz", hash = "sha256:ea835607cd752343b6b2b7ce676893e5a0324082268b48f27aa058bdb7d2145d", size = 110371, upload-time = "2026-01-06T11:21:10.989Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/1d/d9257dd49ff2ca23ea5f132edf1281a0c4f9de8a762b9ae399b670a59235/typer-0.21.1-py3-none-any.whl", hash = "sha256:7985e89081c636b88d172c2ee0cfe33c253160994d47bdfdc302defd7d1f1d01", size = 47381, upload-time = "2026-01-06T11:21:09.824Z" },
-]
-
-[[package]]
-name = "types-python-dateutil"
-version = "2.9.0.20260124"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fe/41/4f8eb1ce08688a9e3e23709ed07089ccdeaf95b93745bfb768c6da71197d/types_python_dateutil-2.9.0.20260124.tar.gz", hash = "sha256:7d2db9f860820c30e5b8152bfe78dbdf795f7d1c6176057424e8b3fdd1f581af", size = 16596, upload-time = "2026-01-24T03:18:42.975Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/c2/aa5e3f4103cc8b1dcf92432415dde75d70021d634ecfd95b2e913cf43e17/types_python_dateutil-2.9.0.20260124-py3-none-any.whl", hash = "sha256:f802977ae08bf2260142e7ca1ab9d4403772a254409f7bbdf652229997124951", size = 18266, upload-time = "2026-01-24T03:18:42.155Z" },
-]
-
-[[package]]
-name = "types-setuptools"
-version = "80.10.0.20260124"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/aa/7e/116539b9610585e34771611e33c88a4c706491fa3565500f5a63139f8731/types_setuptools-80.10.0.20260124.tar.gz", hash = "sha256:1b86d9f0368858663276a0cbe5fe5a9722caf94b5acde8aba0399a6e90680f20", size = 43299, upload-time = "2026-01-24T03:18:39.527Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2b/7f/016dc5cc718ec6ccaa84fb73ed409ef1c261793fd5e637cdfaa18beb40a9/types_setuptools-80.10.0.20260124-py3-none-any.whl", hash = "sha256:efed7e044f01adb9c2806c7a8e1b6aa3656b8e382379b53d5f26ee3db24d4c01", size = 64333, upload-time = "2026-01-24T03:18:38.344Z" },
-]
-
-[[package]]
-name = "types-tabulate"
-version = "0.9.0.20241207"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3f/43/16030404a327e4ff8c692f2273854019ed36718667b2993609dc37d14dd4/types_tabulate-0.9.0.20241207.tar.gz", hash = "sha256:ac1ac174750c0a385dfd248edc6279fa328aaf4ea317915ab879a2ec47833230", size = 8195, upload-time = "2024-12-07T02:54:42.554Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5e/86/a9ebfd509cbe74471106dffed320e208c72537f9aeb0a55eaa6b1b5e4d17/types_tabulate-0.9.0.20241207-py3-none-any.whl", hash = "sha256:b8dad1343c2a8ba5861c5441370c3e35908edd234ff036d4298708a1d4cf8a85", size = 8307, upload-time = "2024-12-07T02:54:41.031Z" },
 ]
 
 [[package]]
