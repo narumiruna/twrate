@@ -78,15 +78,15 @@ def run(source_currency: str) -> None:
     def _fmt_pct(value: float | None) -> str:
         return f"{value * 100:.2f}%" if value is not None else "-"
 
-    table = Table(title=f"TWD FX Rates ({source_currency.upper()})")
+    table = Table(title=f"{source_currency.upper()} 各行即時牌價")
     table.add_column("銀行", justify="left")
     table.add_column("代號", justify="left")
-    table.add_column("Spot Buy", justify="right")
-    table.add_column("Spot Sell", justify="right")
-    table.add_column("Spot Spread", justify="right")
-    table.add_column("Cash Buy", justify="right")
-    table.add_column("Cash Sell", justify="right")
-    table.add_column("Cash Spread", justify="right")
+    table.add_column("即期買進", justify="right")
+    table.add_column("即期賣出", justify="right")
+    table.add_column("即期點差", justify="right")
+    table.add_column("現鈔買進", justify="right")
+    table.add_column("現鈔賣出", justify="right")
+    table.add_column("現鈔點差", justify="right")
 
     for rate in rates:
         table.add_row(
