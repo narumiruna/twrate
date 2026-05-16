@@ -2,6 +2,7 @@ import httpx
 
 from ..types import Exchange
 from ..types import Rate
+from ._ssl import create_bank_ssl_context
 
 
 def parse_rate(value: str) -> float | None:
@@ -26,7 +27,7 @@ async def fetch_nextbank_rates() -> list[Rate]:
 
     api_url = "https://api.nextbank.com.tw/ap6/open/forex/v1.0/GetFXRate"
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=create_bank_ssl_context()) as client:
         resp = await client.post(api_url, json={}, follow_redirects=True)
         resp.raise_for_status()
 
