@@ -38,7 +38,10 @@ def _parse_rate(value: str | None) -> float | None:
 
 def _extract_currency(row: Tag) -> str | None:
     for anchor in row.find_all("a"):
-        onclick = anchor.get("onclick", "")
+        onclick = anchor.get("onclick")
+        if not isinstance(onclick, str):
+            continue
+
         match = re.search(r"queryhistory\('([A-Z]{3})'\)", onclick)
         if match:
             return match.group(1)
