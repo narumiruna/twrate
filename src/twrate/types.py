@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from loguru import logger
 from pydantic import BaseModel
@@ -7,7 +7,7 @@ from pydantic import Field
 from pydantic import field_validator
 
 
-class Exchange(str, Enum):
+class Exchange(StrEnum):
     DBS = "DBS_BANK"
     SINOPAC = "BANK_SINOPAC"
     BOT = "BANK_OF_TAIWAN"
@@ -17,6 +17,10 @@ class Exchange(str, Enum):
     NEXT = "NEXT_BANK"
     KGI = "KGI_BANK"
     CATHAY = "CATHAY_BANK"
+    MEGABANK = "MEGA_BANK"
+    FIRSTBANK = "FIRST_BANK"
+    LANDBANK = "LAND_BANK"
+    YUANTA = "YUANTA_BANK"
 
     def __str__(self) -> str:
         return self.value

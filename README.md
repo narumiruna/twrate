@@ -15,6 +15,10 @@ A Python package for querying real-time exchange rates from major Taiwanese bank
 - Next Bank (將來銀行)
 - KGI Bank (凱基銀行)
 - Cathay United Bank (國泰世華銀行)
+- Mega International Commercial Bank (兆豐銀行)
+- First Bank (第一銀行)
+- Land Bank (土地銀行)
+- Yuanta Bank (元大銀行)
 
 ## Installation
 
@@ -124,7 +128,7 @@ See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
-Contributions are welcome! The package currently supports Bank of Taiwan, DBS Bank, Sinopac Bank, E.SUN Bank, Line Bank, HSBC Bank, Next Bank, KGI Bank, and Cathay United Bank; you can help extend the functionality to cover more Taiwanese banks.
+Contributions are welcome! The package currently supports Bank of Taiwan, DBS Bank, Sinopac Bank, E.SUN Bank, Line Bank, HSBC Bank, Next Bank, KGI Bank, Cathay United Bank, Mega International Commercial Bank, First Bank, Land Bank, and Yuanta Bank; you can help extend the functionality to cover more Taiwanese banks.
 
 ### Development
 
@@ -138,11 +142,11 @@ uv run pytest -v -s --cov=src tests
 
 Support for additional Taiwanese banks:
 
+- [x] 兆豐銀行 (Mega International Commercial Bank) - https://www.megabank.com.tw/personal/savings/foreign-service/forex
+- [x] 第一銀行 (First Bank) - https://www.firstbank.com.tw/sites/fcb/touch/1565688252532
+- [x] 土地銀行 (Land Bank) - https://rate.landbank.com.tw/zh-TW/Foreign?mid=35
+- [x] 元大銀行 (Yuanta Bank) - https://www.yuantabank.com.tw/bank/exchangeRate/hostccy.do
 - [ ] 台新銀行 (Taishin Bank) - https://www.taishinbank.com.tw/TSB/personal/deposit/lookup/realtime/
-- [ ] 兆豐銀行 (Mega International Commercial Bank) - https://www.megabank.com.tw/personal/savings/foreign-service/forex
-- [ ] 第一銀行 (First Bank) - https://www.firstbank.com.tw/sites/fcb/touch/1565688252532
-- [ ] 土地銀行 (Land Bank) - https://rate.landbank.com.tw/zh-TW/Foreign?mid=35
-- [ ] 元大銀行 (Yuanta Bank) - https://www.yuantabank.com.tw/bank/exchangeRate/hostccy.do
 - [ ] 台中銀行 (Taichung Bank) - https://rate.tcbbank.com.tw/CB501014.html
 - [ ] 合作金庫 (Co-operative Bank) - https://www.tcb-bank.com.tw/personal-banking/deposit-exchange/exchange-rate/spot
 - [ ] 台北富邦銀行 (Fubon Bank) - https://www.fubon.com/banking/personal/deposit/exchange_rate/exchange_rate_tw.htm
