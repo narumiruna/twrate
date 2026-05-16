@@ -139,3 +139,10 @@ uv run pytest -v -s --cov=src tests
 Support for additional Taiwanese banks:
 
 - [ ] 台新銀行 (Taishin Bank) - https://www.taishinbank.com.tw/TSB/personal/deposit/lookup/realtime/
+- [ ] 兆豐銀行 (Mega International Commercial Bank) - https://www.megabank.com.tw/personal/savings/foreign-service/forex
+- [ ] 第一銀行 (First Bank) - https://www.firstbank.com.tw/sites/fcb/touch/1565688252532
+- [ ] 土地銀行 (Land Bank) - https://rate.landbank.com.tw/zh-TW/Foreign?mid=35
+- [ ] 元大銀行 (Yuanta Bank) - https://www.yuantabank.com.tw/bank/exchangeRate/hostccy.do
+- [ ] 台中銀行 (Taichung Bank) - https://rate.tcbbank.com.tw/CB501014.html
+- [ ] 合作金庫 (Co-operative Bank) - https://www.tcb-bank.com.tw/personal-banking/deposit-exchange/exchange-rate/spot
+- [ ] 台北富邦銀行 (Fubon Bank) - https://www.fubon.com/banking/personal/deposit/exchange_rate/exchange_rate_tw.htm
