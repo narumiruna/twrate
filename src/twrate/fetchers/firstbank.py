@@ -9,7 +9,6 @@ from ..types import Rate
 _TIMEOUT = 30
 
 
-
 def _parse_rate(value: str | None) -> float | None:
     """Parse a numeric rate value, treating missing values as ``None``."""
     if value is None:

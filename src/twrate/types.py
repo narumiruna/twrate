@@ -21,6 +21,10 @@ class Exchange(StrEnum):
     FIRSTBANK = "FIRST_BANK"
     LANDBANK = "LAND_BANK"
     YUANTA = "YUANTA_BANK"
+    TAISHIN = "TAISHIN_BANK"
+    TAICHUNG = "TAICHUNG_BANK"
+    COOPERATIVE = "COOPERATIVE_BANK"
+    FUBON = "FUBON_BANK"
 
     def __str__(self) -> str:
         return self.value

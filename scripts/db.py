@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from typing import cast
 
 from dotenv import find_dotenv
 from dotenv import load_dotenv
@@ -87,7 +88,7 @@ async def fetch_all_rates() -> list[Rate]:
         if isinstance(result, Exception):
             logger.error("Error fetching rates from {}: {}", exchange.name, result)
         else:
-            rates.extend(result)
+            rates.extend(cast(list[Rate], result))
 
     return rates
 

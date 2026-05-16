@@ -65,12 +65,7 @@ async def fetch_megabank_rates() -> list[Rate]:
                 cash_buy=_parse_rate(cash.get("bid")),
                 cash_sell=_parse_rate(cash.get("ask")),
             )
-            if (
-                rate.spot_buy is None
-                and rate.spot_sell is None
-                and rate.cash_buy is None
-                and rate.cash_sell is None
-            ):
+            if rate.spot_buy is None and rate.spot_sell is None and rate.cash_buy is None and rate.cash_sell is None:
                 continue
 
             rates.append(rate)

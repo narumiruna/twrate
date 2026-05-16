@@ -1,4 +1,5 @@
 import asyncio
+from typing import cast
 
 import typer
 from loguru import logger
@@ -24,7 +25,7 @@ async def fetch_all_rates() -> list[Rate]:
         if isinstance(result, Exception):
             logger.error("Error fetching {:12s}: {}", exchange.value, result)
         else:
-            rates.extend(result)
+            rates.extend(cast(list[Rate], result))
 
     return rates
 
