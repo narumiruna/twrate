@@ -49,4 +49,3 @@ async def fetch_rates(exchange: Exchange) -> list[Rate]:
         raise ValueError(f"Unsupported exchange: {exchange}")
 
     return await fetcher()
-

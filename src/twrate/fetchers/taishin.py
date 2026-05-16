@@ -3,6 +3,7 @@ import re
 
 import httpx
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from ..types import Exchange
 from ..types import Rate
@@ -13,7 +14,7 @@ _SCRIPT_URL = "https://www.taishinbank.com.tw/eServiceA/transactionrate/transact
 
 
 def _decode_script_fragment(fragment: str) -> str:
-    normalized = fragment.replace("\\\"", '"').replace("\\'", "'").replace('\\/', '/')
+    normalized = fragment.replace('\\"', '"').replace("\\'", "'").replace("\\/", "/")
     try:
         return json.loads(f'"{normalized}"')
     except json.JSONDecodeError:
@@ -35,7 +36,7 @@ def _parse_rate(value: str | None) -> float | None:
         return None
 
 
-def _extract_currency(row: object) -> str | None:
+def _extract_currency(row: Tag) -> str | None:
     for anchor in row.find_all("a"):
         onclick = anchor.get("onclick", "")
         match = re.search(r"queryhistory\('([A-Z]{3})'\)", onclick)
