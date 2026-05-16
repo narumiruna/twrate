@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+from ._ssl import create_bank_ssl_context
 
 
 def parse_rate(value: str) -> float | None:
@@ -93,7 +94,7 @@ async def fetch_cathay_rates() -> list[Rate]:
     """
     url = "https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/currency-billboard/"
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=create_bank_ssl_context()) as client:
         resp = await client.get(url, follow_redirects=True, timeout=30)
         resp.raise_for_status()
 
