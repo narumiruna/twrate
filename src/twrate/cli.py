@@ -3,8 +3,8 @@ from typing import cast
 
 import typer
 from loguru import logger
-from rich import print
-from tabulate import tabulate
+from rich.console import Console
+from rich.table import Table
 
 from .fetcher import fetch_rates
 from .types import Exchange
@@ -48,35 +48,33 @@ def run(source_currency: str) -> None:
 
     rates = sorted(rates, key=sort_key)
 
-    # build table
-    table = [
-        [
-            rate.exchange,
-            rate.spot_buy,
-            rate.spot_sell,
-            f"{rate.spot_spread * 100:.2f}%" if rate.spot_spread is not None else None,
-            rate.cash_buy,
-            rate.cash_sell,
-            f"{rate.cash_spread * 100:.2f}%" if rate.cash_spread is not None else None,
-        ]
-        for rate in rates
-    ]
+    def _fmt_float(value: float | None) -> str:
+        return f"{value:.4f}" if value is not None else "-"
 
-    print(
-        tabulate(
-            table,
-            headers=[
-                "Exchange",
-                "Spot Buy",
-                "Spot Sell",
-                "Spot Spread",
-                "Cash Buy",
-                "Cash Sell",
-                "Cash Spread",
-            ],
-            stralign="right",
+    def _fmt_pct(value: float | None) -> str:
+        return f"{value * 100:.2f}%" if value is not None else "-"
+
+    table = Table(title=f"TWD FX Rates ({source_currency.upper()})")
+    table.add_column("Exchange", justify="left")
+    table.add_column("Spot Buy", justify="right")
+    table.add_column("Spot Sell", justify="right")
+    table.add_column("Spot Spread", justify="right")
+    table.add_column("Cash Buy", justify="right")
+    table.add_column("Cash Sell", justify="right")
+    table.add_column("Cash Spread", justify="right")
+
+    for rate in rates:
+        table.add_row(
+            rate.exchange.value,
+            _fmt_float(rate.spot_buy),
+            _fmt_float(rate.spot_sell),
+            _fmt_pct(rate.spot_spread),
+            _fmt_float(rate.cash_buy),
+            _fmt_float(rate.cash_sell),
+            _fmt_pct(rate.cash_spread),
         )
-    )
+
+    Console().print(table)
 
 
 def main() -> None:
