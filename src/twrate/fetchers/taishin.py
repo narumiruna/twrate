@@ -49,6 +49,70 @@ def _extract_currency(row: Tag) -> str | None:
     return None
 
 
+def _rate_columns_start(cells: list[Tag]) -> int:
+    """Return the offset for rate columns.
+
+    Some page variants prepend a currency label cell before rate values.
+    """
+
+    if len(cells) < 5:
+        return 0
+
+    first_rate = _parse_rate(cells[0].get_text(" ", strip=True))
+    if first_rate is None:
+        second_rate = _parse_rate(cells[1].get_text(" ", strip=True))
+        if second_rate is not None:
+            return 1
+
+    return 0
+
+
+def _extract_taishin_table_rates(table: Tag) -> list[Rate]:
+    rows = table.find_all("tr")
+    if not rows:
+        return []
+
+    header = "".join(cell.get_text("", strip=True) for cell in rows[0].find_all(["th", "td"]))
+    if "即期買入" not in header or "現鈔賣出" not in header:
+        return []
+
+    rates: list[Rate] = []
+    for row in rows[1:]:
+        cells = row.find_all("td")
+        if len(cells) < 5:
+            continue
+
+        source = _extract_currency(row)
+        if not source:
+            continue
+
+        offset = _rate_columns_start(cells)
+        if len(cells) < offset + 4:
+            continue
+
+        spot_buy = _parse_rate(cells[offset + 0].get_text(" ", strip=True))
+        spot_sell = _parse_rate(cells[offset + 1].get_text(" ", strip=True))
+        cash_buy = _parse_rate(cells[offset + 2].get_text(" ", strip=True))
+        cash_sell = _parse_rate(cells[offset + 3].get_text(" ", strip=True))
+
+        if all(value is None for value in (spot_buy, spot_sell, cash_buy, cash_sell)):
+            continue
+
+        rates.append(
+            Rate(
+                exchange=Exchange.TAISHIN,
+                source=source,
+                target="TWD",
+                spot_buy=spot_buy,
+                spot_sell=spot_sell,
+                cash_buy=cash_buy,
+                cash_sell=cash_sell,
+            )
+        )
+
+    return rates
+
+
 async def fetch_taishin_rates() -> list[Rate]:
     """Query Taishin Bank exchange rates."""
     async with httpx.AsyncClient(
@@ -64,49 +128,7 @@ async def fetch_taishin_rates() -> list[Rate]:
 
         soup = BeautifulSoup(html, "html.parser")
 
-    tables = soup.find_all("table")
-    if not tables:
-        raise ValueError("No exchange tables found in Taishin script output")
-
-    rates: list[Rate] = []
-    for table in tables:
-        rows = table.find_all("tr")
-        if not rows:
-            continue
-
-        header = "".join(cell.get_text("", strip=True) for cell in rows[0].find_all(["th", "td"]))
-        if "即期買入" not in header or "現鈔賣出" not in header:
-            continue
-
-        for row in rows[1:]:
-            cells = row.find_all("td")
-            if len(cells) < 5:
-                continue
-
-            source = _extract_currency(row)
-            if not source:
-                continue
-
-            spot_buy = _parse_rate(cells[0].get_text(" ", strip=True))
-            spot_sell = _parse_rate(cells[1].get_text(" ", strip=True))
-            cash_buy = _parse_rate(cells[2].get_text(" ", strip=True))
-            cash_sell = _parse_rate(cells[3].get_text(" ", strip=True))
-
-            if all(value is None for value in (spot_buy, spot_sell, cash_buy, cash_sell)):
-                continue
-
-            rates.append(
-                Rate(
-                    exchange=Exchange.TAISHIN,
-                    source=source,
-                    target="TWD",
-                    spot_buy=spot_buy,
-                    spot_sell=spot_sell,
-                    cash_buy=cash_buy,
-                    cash_sell=cash_sell,
-                )
-            )
-
+    rates = [rate for table in soup.find_all("table") for rate in _extract_taishin_table_rates(table)]
     if not rates:
         raise ValueError("No Taishin rates parsed from export script")
 
