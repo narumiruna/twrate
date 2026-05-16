@@ -1,156 +1,181 @@
-# twrate
+# twrate 🇹🇼 — Taiwan Exchange Rate API and CLI for Python
 
-A Python package for querying real-time exchange rates from major Taiwanese banks.
+`twrate` is a Python package and command-line tool for querying live foreign exchange rates from Taiwanese banks. It fetches TWD exchange-rate board data from multiple bank sources concurrently, so you can compare spot rates, cash rates, mid-rates, and spreads for currencies such as USD/TWD, JPY/TWD, EUR/TWD, and more.
 
-## Overview
+Use `twrate` when you need a lightweight Taiwan exchange rate API for scripts, data pipelines, dashboards, or terminal-based rate checks.
 
-`twrate` provides a simple and efficient way to retrieve up-to-date currency exchange rates from Taiwanese banks using asynchronous fetchers and concurrent fan-out. Currently, it supports the following banks:
+## ✨ Features
 
-- Bank of Taiwan (台灣銀行)
-- DBS Bank Taiwan (星展銀行)
-- Sinopac Bank (永豐銀行)
-- E.SUN Bank (玉山銀行)
-- Line Bank (LINE Bank)
-- HSBC Bank Taiwan (匯豐銀行)
-- Next Bank (將來銀行)
-- KGI Bank (凱基銀行)
-- Cathay United Bank (國泰世華銀行)
-- Mega International Commercial Bank (兆豐銀行)
-- First Bank (第一銀行)
-- Land Bank (土地銀行)
-- Yuanta Bank (元大銀行)
-- Taishin Bank (台新銀行)
-- Taichung Bank (台中銀行)
-- Co-operative Bank (合作金庫)
-- Fubon Bank (台北富邦銀行)
+- 🏦 **Taiwan bank exchange rates** from 17 supported banks.
+- ⚡ **Async Python API** built for concurrent fan-out with `asyncio` and `httpx`.
+- 💱 **CLI for quick lookup**: run `twrate USD` to compare USD/TWD rates across banks.
+- 📊 **Normalized `Rate` model** with spot buy/sell, cash buy/sell, mid-rate, spread, currency pair, and fetch timestamp.
+- ✅ **Typed package** with Pydantic validation and `py.typed` support.
+- 🧩 **Bank-specific fetchers** that keep each source isolated and easy to maintain.
 
-## Installation
+## 🏦 Supported Taiwanese banks
+
+| Bank | Chinese name | Exchange enum |
+| --- | --- | --- |
+| Bank of Taiwan | 台灣銀行 | `Exchange.BOT` |
+| DBS Bank Taiwan | 星展銀行 | `Exchange.DBS` |
+| SinoPac Bank | 永豐銀行 | `Exchange.SINOPAC` |
+| E.SUN Bank | 玉山銀行 | `Exchange.ESUN` |
+| LINE Bank | LINE Bank | `Exchange.LINE` |
+| HSBC Bank Taiwan | 匯豐銀行 | `Exchange.HSBC` |
+| Next Bank | 將來銀行 | `Exchange.NEXT` |
+| KGI Bank | 凱基銀行 | `Exchange.KGI` |
+| Cathay United Bank | 國泰世華銀行 | `Exchange.CATHAY` |
+| Mega International Commercial Bank | 兆豐銀行 | `Exchange.MEGABANK` |
+| First Bank | 第一銀行 | `Exchange.FIRSTBANK` |
+| Land Bank of Taiwan | 土地銀行 | `Exchange.LANDBANK` |
+| Yuanta Bank | 元大銀行 | `Exchange.YUANTA` |
+| Taishin Bank | 台新銀行 | `Exchange.TAISHIN` |
+| Taichung Bank | 台中銀行 | `Exchange.TAICHUNG` |
+| Taiwan Cooperative Bank | 合作金庫 | `Exchange.COOPERATIVE` |
+| Fubon Bank | 台北富邦銀行 | `Exchange.FUBON` |
+
+> Availability depends on each bank's public website or API. Some banks may publish only spot rates, only selected currencies, or temporarily unavailable data.
+
+## 📦 Installation
+
+`twrate` requires Python 3.12 or later.
 
 ```bash
 pip install twrate
 ```
 
-> Requires Python 3.12+. For local development, prefer `uv` (e.g., `uv sync` to install and `uv run twrate USD` to execute the CLI inside the managed environment).
+For local development, use `uv`:
 
-## Usage
+```bash
+uv sync
+uv run twrate USD
+```
 
-### Basic Usage
+You can also run the CLI without installing it into the current environment:
+
+```bash
+uvx twrate USD
+```
+
+## 🚀 Quick start
+
+### 💱 Compare USD/TWD rates in the terminal
+
+```bash
+twrate USD
+```
+
+Example output:
+
+```text
+                            USD 各行即時牌價
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓
+┃ 銀行                ┃ 即期買進 ┃ 即期賣出 ┃ 即期點差 ┃ 現鈔買進 ┃ 現鈔賣出 ┃ 現鈔點差 ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━┩
+│ 台灣銀行 (Bank ... │ 30.0950  │ 30.2450  │ 0.50%    │ 29.7700  │ 30.4400  │ 2.22%    │
+│ 星展銀行 (DBS ...  │ 30.0760  │ 30.2790  │ 0.67%    │ 29.8630  │ 30.4700  │ 2.01%    │
+└─────────────────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┘
+```
+
+### 🐍 Fetch rates from one bank in Python
 
 ```python
 import asyncio
 
-from rich import print
-
-from twrate import Exchange
-from twrate import fetch_rates
+from twrate import Exchange, fetch_rates
 
 
-async def main():
-    for exchange in Exchange:
-        rates = await fetch_rates(exchange)
-        print(rates)
+async def main() -> None:
+    rates = await fetch_rates(Exchange.BOT)
+
+    usd_rates = [rate for rate in rates if rate.source == "USD"]
+    for rate in usd_rates:
+        print(rate.symbol, rate.spot_buy, rate.spot_sell, rate.spot_spread)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Or fetch rates from all exchanges concurrently:
+### ⚡ Fetch all banks concurrently
 
 ```python
 import asyncio
 
-from twrate import Exchange
-from twrate import fetch_rates
+from twrate import Exchange, Rate, fetch_rates
 
 
-async def main():
-    # Fetch all rates concurrently
+async def fetch_all_rates() -> list[Rate]:
     tasks = [fetch_rates(exchange) for exchange in Exchange]
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    all_rates = []
+    rates: list[Rate] = []
     for exchange, result in zip(Exchange, results, strict=False):
         if isinstance(result, Exception):
-            print(f"Error fetching {exchange.value}: {result}")
-        else:
-            all_rates.extend(result)
+            print(f"Failed to fetch {exchange.value}: {result}")
+            continue
 
-    return all_rates
+        rates.extend(result)
+
+    return rates
 
 
 if __name__ == "__main__":
-    rates = asyncio.run(main())
-    print(rates)
+    all_rates = asyncio.run(fetch_all_rates())
+    usd_rates = [rate for rate in all_rates if rate.source == "USD"]
+    print(usd_rates)
 ```
 
-### Command-Line Interface
+## 📊 `Rate` model
 
-You can also use `twrate` directly from the command line:
+Each fetcher returns a list of normalized `Rate` objects:
+
+| Field or property | Description |
+| --- | --- |
+| `exchange` | Bank identifier, such as `Exchange.BOT` or `Exchange.DBS`. |
+| `source` | Source currency code, such as `USD`, `JPY`, or `EUR`. |
+| `target` | Target currency code. For this package, it is usually `TWD`. |
+| `spot_buy` | Bank spot buying rate. |
+| `spot_sell` | Bank spot selling rate. |
+| `cash_buy` | Bank cash buying rate, if available. |
+| `cash_sell` | Bank cash selling rate, if available. |
+| `fetched_at` | Timestamp generated when the `Rate` object is created. |
+| `spot_mid` | Mid-rate calculated from `spot_buy` and `spot_sell`. |
+| `cash_mid` | Mid-rate calculated from `cash_buy` and `cash_sell`. |
+| `spot_spread` | Relative spread for spot transactions. |
+| `cash_spread` | Relative spread for cash transactions. |
+| `symbol` | Currency pair string, for example `USD/TWD`. |
+
+Missing or zero bank values are normalized to `None`.
+
+## 🛠️ Development
+
+Install dependencies and run commands through `uv`:
 
 ```bash
-# Query exchange rates for USD from all supported banks (installed via pip)
-twrate USD
-
-# Run inside the uv-managed environment when developing locally
+uv sync
+uv run pytest
 uv run twrate USD
-
-# Or run without installing into the current environment
-uvx twrate USD
 ```
 
-Example output:
-```
-Exchange          Spot Buy    Spot Sell    Cash Buy    Cash Sell
---------------  ----------  -----------  ----------  -----------
-BANK_OF_TAIWAN      30.095       30.245      29.77        30.44
-DBS                 30.076       30.279      29.863       30.47
-SINOPAC             30.092       30.203      29.892       30.403
-ESUN                30.1         30.2        29.85        30.4
-```
-
-### Rate Information
-
-The `Rate` object provides the following information:
-
-- `exchange`: The bank code (e.g., "BOT" for Bank of Taiwan, "DBS" for DBS Bank)
-- `source`: The source currency code
-- `target`: The target currency code (always "TWD")
-- `spot_buy`: The bank's buying rate for spot transactions
-- `spot_sell`: The bank's selling rate for spot transactions
-- `cash_buy`: The bank's buying rate for cash transactions
-- `cash_sell`: The bank's selling rate for cash transactions
-- `spot_mid`: A calculated property that returns the mid-rate between spot buy and sell
-- `cash_mid`: A calculated property that returns the mid-rate between cash buy and sell
-- `spot_spread`: Relative spread for spot transactions
-- `cash_spread`: Relative spread for cash transactions
-- `symbol`: Formatted currency pair string (e.g., `USD/TWD`)
-
-## License
-
-See the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! The package currently supports Bank of Taiwan, DBS Bank, Sinopac Bank, E.SUN Bank, Line Bank, HSBC Bank, Next Bank, KGI Bank, Cathay United Bank, Mega International Commercial Bank, First Bank, Land Bank, Yuanta Bank, Taishin Bank, Taichung Bank, Co-operative Bank, and Fubon Bank; you can help extend the functionality to cover more Taiwanese banks.
-
-### Development
-
-- Run tests
+Run the full test suite with coverage:
 
 ```bash
 uv run pytest -v -s --cov=src tests
 ```
 
-## TODO
+## 🤝 Contributing
 
-Support for additional Taiwanese banks:
+Contributions are welcome. Good first issues include:
 
-- [x] 兆豐銀行 (Mega International Commercial Bank) - https://www.megabank.com.tw/personal/savings/foreign-service/forex
-- [x] 第一銀行 (First Bank) - https://www.firstbank.com.tw/sites/fcb/touch/1565688252532
-- [x] 土地銀行 (Land Bank) - https://rate.landbank.com.tw/zh-TW/Foreign?mid=35
-- [x] 元大銀行 (Yuanta Bank) - https://www.yuantabank.com.tw/bank/exchangeRate/hostccy.do
-- [x] 台新銀行 (Taishin Bank) - https://www.taishinbank.com.tw/TSB/personal/deposit/lookup/realtime/
-- [x] 台中銀行 (Taichung Bank) - https://rate.tcbbank.com.tw/CB501014.html
-- [x] 合作金庫 (Co-operative Bank) - https://www.tcb-bank.com.tw/personal-banking/deposit-exchange/exchange-rate/spot
-- [x] 台北富邦銀行 (Fubon Bank) - https://www.fubon.com/banking/personal/deposit/exchange_rate/exchange_rate_tw.htm
+- Fixing a bank fetcher when a public page or API changes.
+- Adding tests and sample fixtures for existing fetchers.
+- Improving parsing for currencies with partial spot or cash data.
+- Adding a new Taiwanese bank source while preserving the shared `Rate` model.
+
+When adding or updating a fetcher, keep it bank-specific, async-first, and covered by tests where possible.
+
+## 📄 License
+
+`twrate` is released under the terms in [LICENSE](LICENSE).
