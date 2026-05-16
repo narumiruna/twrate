@@ -30,9 +30,37 @@ BANK_NAME_ZHTW = {
     Exchange.FUBON: "台北富邦銀行",
 }
 
+BANK_NAME_EN = {
+    Exchange.BOT: "Bank of Taiwan",
+    Exchange.DBS: "DBS Bank",
+    Exchange.SINOPAC: "Sinopac Bank",
+    Exchange.ESUN: "E.SUN Bank",
+    Exchange.LINE: "LINE Bank",
+    Exchange.HSBC: "HSBC Bank",
+    Exchange.NEXT: "Next Bank",
+    Exchange.KGI: "KGI Bank",
+    Exchange.CATHAY: "Cathay United Bank",
+    Exchange.MEGABANK: "Mega International Commercial Bank",
+    Exchange.FIRSTBANK: "First Bank",
+    Exchange.LANDBANK: "Land Bank",
+    Exchange.YUANTA: "Yuanta Bank",
+    Exchange.TAISHIN: "Taishin Bank",
+    Exchange.TAICHUNG: "Taichung Bank",
+    Exchange.COOPERATIVE: "Taiwan Cooperative Bank",
+    Exchange.FUBON: "Fubon Bank",
+}
+
 
 def _exchange_display(exchange: Exchange) -> str:
-    return BANK_NAME_ZHTW.get(exchange, exchange.value)
+    zh = BANK_NAME_ZHTW.get(exchange)
+    if zh is None:
+        return exchange.value
+
+    en = BANK_NAME_EN.get(exchange, exchange.value)
+    if en == exchange.value:
+        return zh
+
+    return f"{zh} ({en})"
 
 
 async def fetch_all_rates() -> list[Rate]:
@@ -80,7 +108,6 @@ def run(source_currency: str) -> None:
 
     table = Table(title=f"{source_currency.upper()} 各行即時牌價")
     table.add_column("銀行", justify="left")
-    table.add_column("代號", justify="left")
     table.add_column("即期買進", justify="right")
     table.add_column("即期賣出", justify="right")
     table.add_column("即期點差", justify="right")
@@ -91,7 +118,6 @@ def run(source_currency: str) -> None:
     for rate in rates:
         table.add_row(
             _exchange_display(rate.exchange),
-            rate.exchange.value,
             _fmt_float(rate.spot_buy),
             _fmt_float(rate.spot_sell),
             _fmt_pct(rate.spot_spread),
