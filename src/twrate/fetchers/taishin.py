@@ -128,7 +128,10 @@ async def fetch_taishin_rates() -> list[Rate]:
 
         soup = BeautifulSoup(html, "html.parser")
 
-    rates = [rate for table in soup.find_all("table") for rate in _extract_taishin_table_rates(table)]
+    # the rate board nests left/right sub-tables inside an outer table;
+    # parsing nested tables would duplicate every currency
+    tables = [table for table in soup.find_all("table") if table.find_parent("table") is None]
+    rates = [rate for table in tables for rate in _extract_taishin_table_rates(table)]
     if not rates:
         raise ValueError("No Taishin rates parsed from export script")
 

@@ -16,6 +16,9 @@ async def test_fetch_rates(exchange: Exchange) -> None:
 
     assert isinstance(rates, list)
     assert len(rates) > 0
+
+    sources = [rate.source for rate in rates]
+    assert len(sources) == len(set(sources)), f"duplicate currencies: {sources}"
     for rate in rates:
         assert rate.exchange == exchange
         assert rate.target == "TWD"
