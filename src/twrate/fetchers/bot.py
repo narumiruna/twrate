@@ -1,13 +1,11 @@
-import httpx
+from curl_cffi.requests import AsyncSession
 
 from ..types import Exchange
 from ..types import Rate
 
+# the endpoint serves the English table without an explicit locale
 _HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    ),
+    "Accept-Language": "zh-TW,zh;q=0.9",
 }
 
 _TIMEOUT = 30
@@ -32,17 +30,17 @@ async def fetch_bot_rates() -> list[Rate]:
     """
     url = "https://rate.bot.com.tw/xrt/fltxt/0/day"
 
-    async with httpx.AsyncClient(follow_redirects=True, timeout=_TIMEOUT) as client:
-        resp = await client.get(url, headers=_HEADERS)
+    # rate.bot.com.tw serves a JS anti-bot challenge page to clients without a
+    # browser TLS fingerprint, so impersonate one via curl_cffi
+    async with AsyncSession(impersonate="chrome", timeout=_TIMEOUT) as session:
+        resp = await session.get(url, headers=_HEADERS)
         resp.raise_for_status()
-        resp.encoding = "utf-8-sig"
 
-        # rate.bot.com.tw intermittently serves a JS anti-bot challenge page
-        # instead of the plain-text rate table
-        if resp.text.lstrip().lower().startswith(("<!doctype", "<html")):
+        text = resp.content.decode("utf-8-sig")
+        if text.lstrip().lower().startswith(("<!doctype", "<html")):
             raise ValueError("rate.bot.com.tw returned an anti-bot challenge page instead of rate data")
 
-        splits = resp.text.splitlines()
+        splits = text.splitlines()
         header, rows = splits[0], splits[1:]
         check_header(header)
 
