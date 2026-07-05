@@ -3,6 +3,15 @@ import httpx
 from ..types import Exchange
 from ..types import Rate
 
+_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    ),
+}
+
+_TIMEOUT = 30
+
 
 def check_header(header: str) -> None:
     columns = [s for s in header.split(" ") if s]
@@ -23,10 +32,15 @@ async def fetch_bot_rates() -> list[Rate]:
     """
     url = "https://rate.bot.com.tw/xrt/fltxt/0/day"
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(url)
+    async with httpx.AsyncClient(follow_redirects=True, timeout=_TIMEOUT) as client:
+        resp = await client.get(url, headers=_HEADERS)
         resp.raise_for_status()
         resp.encoding = "utf-8-sig"
+
+        # rate.bot.com.tw intermittently serves a JS anti-bot challenge page
+        # instead of the plain-text rate table
+        if resp.text.lstrip().lower().startswith(("<!doctype", "<html")):
+            raise ValueError("rate.bot.com.tw returned an anti-bot challenge page instead of rate data")
 
         splits = resp.text.splitlines()
         header, rows = splits[0], splits[1:]
