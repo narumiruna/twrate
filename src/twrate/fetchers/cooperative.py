@@ -1,8 +1,13 @@
+from typing import Any
+
 import httpx
 from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
+from ._parsing import normalize_currency_code
+from ._parsing import require_mapping
 from ._ssl import create_bank_ssl_context
 
 _TIMEOUT = 30
@@ -14,13 +19,17 @@ _HEADERS = {
 }
 
 
-def _parse_rate(value: str | None) -> float | None:
+def _parse_rate(value: Any) -> float | None:
     if value is None:
         return None
 
-    value = value.strip()
-    if not value or value == "-":
+    if isinstance(value, bool):
         return None
+
+    if isinstance(value, str):
+        value = value.strip()
+        if not value or value == "-":
+            return None
 
     try:
         return float(value)
@@ -61,18 +70,18 @@ async def fetch_cooperative_bank_rates() -> list[Rate]:
 
         payload = api_resp.json()
 
+    payload = require_mapping(payload, "Unexpected Co-operative Bank API format")
     result = payload.get("result")
     if not isinstance(result, list):
         raise ValueError("Unexpected Co-operative Bank API format")
 
     by_currency: dict[str, dict[str, float | None]] = {}
     for item in result:
-        source = item.get("Currency")
-        if not isinstance(source, str):
+        if not isinstance(item, dict):
             continue
 
-        source = source.strip().upper()
-        if not source:
+        source = normalize_currency_code(item.get("Currency"))
+        if source is None:
             continue
 
         row = by_currency.setdefault(source, {"spot_buy": None, "spot_sell": None, "cash_buy": None, "cash_sell": None})
@@ -97,7 +106,7 @@ async def fetch_cooperative_bank_rates() -> list[Rate]:
             cash_sell=row["cash_sell"],
         )
 
-        if all(value is None for value in (rate.spot_buy, rate.spot_sell, rate.cash_buy, rate.cash_sell)):
+        if not has_any_rate(rate):
             continue
 
         rates.append(rate)

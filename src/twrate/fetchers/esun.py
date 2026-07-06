@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 import httpx
 from pydantic import BaseModel
@@ -9,12 +10,14 @@ from pydantic import field_validator
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
+from ._parsing import normalize_currency_code
 
 
 class EsunRate(BaseModel):
     name: str = Field(..., validation_alias="Name")
-    b_board_rate: float = Field(..., validation_alias="BBoardRate")
-    s_board_rate: float = Field(..., validation_alias="SBoardRate")
+    b_board_rate: float | None = Field(..., validation_alias="BBoardRate")
+    s_board_rate: float | None = Field(..., validation_alias="SBoardRate")
     cash_b_board_rate: float | None = Field(..., validation_alias="CashBBoardRate")
     cash_s_board_rate: float | None = Field(..., validation_alias="CashSBoardRate")
     buy_increase_rate: float | None = Field(..., validation_alias="BuyIncreaseRate")
@@ -30,11 +33,28 @@ class EsunRate(BaseModel):
     cash_bonus: str | None = Field(..., validation_alias="CashBonus")
     description: str | None = Field(..., validation_alias="Description")
 
-    @field_validator("cash_b_board_rate", "cash_s_board_rate", "buy_increase_rate", "sell_decrease_rate", mode="before")
+    @field_validator(
+        "b_board_rate",
+        "s_board_rate",
+        "cash_b_board_rate",
+        "cash_s_board_rate",
+        "buy_increase_rate",
+        "sell_decrease_rate",
+        mode="before",
+    )
     @classmethod
-    def parse_float(cls, value: str) -> float | None:
-        if value == "-" or value == "":
+    def parse_float(cls, value: Any) -> float | None:
+        if value is None:
             return None
+
+        if isinstance(value, bool):
+            raise ValueError("rate value must be numeric, not boolean")
+
+        if isinstance(value, str):
+            value = value.strip()
+            if value == "-" or value == "":
+                return None
+
         return float(value)
 
     @field_validator("update_time", mode="before")
@@ -53,6 +73,19 @@ class EsunRateResponse(BaseModel):
     clear: int = Field(..., validation_alias="Clear")
 
 
+def _split_currency_pair(value: str) -> tuple[str, str] | None:
+    parts = value.split("/")
+    if len(parts) != 2:
+        return None
+
+    source = normalize_currency_code(parts[0])
+    target = normalize_currency_code(parts[1])
+    if source is None or target is None:
+        return None
+
+    return source, target
+
+
 async def fetch_esun_rates() -> list[Rate]:
     url = "https://www.esunbank.com/api/client/ExchangeRate/LastRateInfo"
 
@@ -64,14 +97,26 @@ async def fetch_esun_rates() -> list[Rate]:
 
         rates = []
         for r in data.rates:
+            pair = _split_currency_pair(r.ccy)
+            if pair is None:
+                continue
+
+            source, target = pair
             rate = Rate(
                 exchange=Exchange.ESUN,
-                source=r.ccy.split("/")[0].upper(),
-                target=r.ccy.split("/")[1].upper(),
+                source=source,
+                target=target,
                 spot_buy=r.b_board_rate,
                 spot_sell=r.s_board_rate,
                 cash_buy=r.cash_b_board_rate,
                 cash_sell=r.cash_s_board_rate,
             )
+            if not has_any_rate(rate):
+                continue
+
             rates.append(rate)
+
+        if not rates:
+            raise ValueError("No E.SUN Bank rates parsed from API response")
+
         return rates

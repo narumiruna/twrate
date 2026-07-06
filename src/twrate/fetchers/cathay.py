@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
+from ._parsing import normalize_currency_code
 from ._ssl import create_bank_ssl_context
 
 
@@ -27,7 +29,7 @@ def extract_currency_code(section) -> str | None:
     currency_text = currency_name_div.get_text(strip=True)
     # Format is like "美元USD" or "歐元EUR"
     match = re.search(r"([A-Z]{3})", currency_text)
-    return match.group(1) if match else None
+    return normalize_currency_code(match.group(1)) if match else None
 
 
 def parse_rate_table(table) -> tuple[float | None, float | None, float | None, float | None]:
@@ -76,7 +78,7 @@ def parse_currency_section(section) -> Rate | None:
 
     spot_buy, spot_sell, cash_buy, cash_sell = parse_rate_table(table)
 
-    return Rate(
+    rate = Rate(
         exchange=Exchange.CATHAY,
         source=currency_code,
         target="TWD",
@@ -85,6 +87,7 @@ def parse_currency_section(section) -> Rate | None:
         cash_buy=cash_buy,
         cash_sell=cash_sell,
     )
+    return rate if has_any_rate(rate) else None
 
 
 async def fetch_cathay_rates() -> list[Rate]:
@@ -114,5 +117,8 @@ async def fetch_cathay_rates() -> list[Rate]:
             rate = parse_currency_section(section)
             if rate:
                 rates.append(rate)
+
+        if not rates:
+            raise ValueError("No Cathay United Bank rates parsed from page")
 
         return rates

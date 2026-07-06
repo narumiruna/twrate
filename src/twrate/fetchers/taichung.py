@@ -1,7 +1,13 @@
+from typing import Any
+
 import httpx
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
+from ._parsing import normalize_currency_code
+from ._parsing import optional_mapping
+from ._parsing import require_mapping
 
 _TIMEOUT = 30
 _API_URL = "https://openbank.tcbbank.com.tw/openAPI/v1.0.0/otherService/exchangeRates"
@@ -22,9 +28,14 @@ _CURRENCIES = (
 )
 
 
-def _parse_rate(value: str | None) -> float | None:
-    if not value:
+def _parse_rate(value: Any) -> float | None:
+    if value is None or isinstance(value, bool):
         return None
+
+    if isinstance(value, str):
+        value = value.strip()
+        if not value:
+            return None
 
     try:
         return float(value)
@@ -42,23 +53,23 @@ async def fetch_taichung_rates() -> list[Rate]:
 
         payload = resp.json()
 
-    rates_body = payload.get("appRepBody", {})
+    payload = require_mapping(payload, "Unexpected Taichung Bank response format")
+    rates_body = require_mapping(payload.get("appRepBody"), "Unexpected Taichung Bank response format")
     rates_data = rates_body.get("exchangeRates")
     if not isinstance(rates_data, list):
         raise ValueError("Unexpected Taichung Bank response format")
 
     rates: list[Rate] = []
     for item in rates_data:
-        source = item.get("currency", "")
-        if not isinstance(source, str):
+        if not isinstance(item, dict):
             continue
 
-        source = source.strip().upper()
-        if not source:
+        source = normalize_currency_code(item.get("currency"))
+        if source is None:
             continue
 
-        spot = item.get("spotExchangeRate") or {}
-        cash = item.get("cashExchangeRate") or {}
+        spot = optional_mapping(item.get("spotExchangeRate"))
+        cash = optional_mapping(item.get("cashExchangeRate"))
 
         rate = Rate(
             exchange=Exchange.TAICHUNG,
@@ -70,7 +81,7 @@ async def fetch_taichung_rates() -> list[Rate]:
             cash_sell=_parse_rate(cash.get("sale")),
         )
 
-        if all(value is None for value in (rate.spot_buy, rate.spot_sell, rate.cash_buy, rate.cash_sell)):
+        if not has_any_rate(rate):
             continue
 
         rates.append(rate)

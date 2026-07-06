@@ -1,7 +1,12 @@
+from typing import Any
+
 import httpx
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
+from ._parsing import normalize_currency_code
+from ._parsing import require_mapping
 from ._ssl import create_bank_ssl_context
 
 _TIMEOUT = 30
@@ -15,12 +20,20 @@ _HEADERS = {
 }
 
 
-def _parse_rate(value: str | None) -> float | None:
+def _parse_rate(value: Any) -> float | None:
     if value is None:
         return None
 
+    if isinstance(value, bool):
+        return None
+
+    if isinstance(value, str):
+        value = value.strip()
+        if not value or value == "-":
+            return None
+
     try:
-        return float(value.strip())
+        return float(value)
     except (TypeError, ValueError):
         return None
 
@@ -37,18 +50,18 @@ async def fetch_fubon_rates() -> list[Rate]:
 
         payload = resp.json()
 
+    payload = require_mapping(payload, "Unexpected Fubon response format")
     rates_data = payload.get("FE_data")
     if not isinstance(rates_data, list):
         raise ValueError("Unexpected Fubon response format")
 
     rates: list[Rate] = []
     for item in rates_data:
-        source = item.get("currencyEname")
-        if not isinstance(source, str):
+        if not isinstance(item, dict):
             continue
 
-        source = source.strip().upper()
-        if not source:
+        source = normalize_currency_code(item.get("currencyEname"))
+        if source is None:
             continue
 
         rate = Rate(
@@ -61,7 +74,7 @@ async def fetch_fubon_rates() -> list[Rate]:
             cash_sell=_parse_rate(item.get("cash_SELL")),
         )
 
-        if all(value is None for value in (rate.spot_buy, rate.spot_sell, rate.cash_buy, rate.cash_sell)):
+        if not has_any_rate(rate):
             continue
 
         rates.append(rate)
