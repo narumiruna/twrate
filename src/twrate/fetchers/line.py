@@ -19,10 +19,8 @@ _TIMEOUT = 30
 
 def _extract_currency_code(cell: Tag) -> str | None:
     text = cell.get_text(separator=" ", strip=True).upper()
-    for token in re.split(r"\s+", text):
-        if re.fullmatch(r"[A-Z]{3}", token):
-            return token
-    return None
+    match = re.search(r"[A-Z]{3}", text)
+    return match.group(0) if match else None
 
 
 def parse_line_rate_table(html: str) -> list[Rate]:

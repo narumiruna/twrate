@@ -176,12 +176,13 @@ def test_line_parser_rejects_pages_without_rate_cells() -> None:
         parse_line_rate_table("<html><body>No table yet</body></html>")
 
 
-def test_line_parser_extracts_currency_code_from_whitespace_separated_cell() -> None:
-    html = """
+@pytest.mark.parametrize("currency_cell", ["美金 USD", "美金USD"])
+def test_line_parser_extracts_currency_code_from_cell(currency_cell: str) -> None:
+    html = f"""
     <table>
       <tbody>
         <tr>
-          <td>美金 USD</td>
+          <td>{currency_cell}</td>
           <td>31.100</td>
           <td>31.300</td>
         </tr>
