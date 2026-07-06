@@ -21,33 +21,7 @@ from .types import Exchange
 from .types import Rate
 
 
-def _normalize_exchange(exchange: Exchange | str) -> Exchange:
-    if isinstance(exchange, Exchange):
-        return exchange
-
-    if isinstance(exchange, str):
-        value = exchange.strip()
-        if value:
-            try:
-                return Exchange(value)
-            except ValueError:
-                pass
-
-            try:
-                return Exchange(value.upper())
-            except ValueError:
-                pass
-
-            try:
-                return Exchange[value.upper()]
-            except KeyError:
-                pass
-
-    raise ValueError(f"Unsupported exchange: {exchange}")
-
-
-async def fetch_rates(exchange: Exchange | str) -> list[Rate]:
-    exchange = _normalize_exchange(exchange)
+async def fetch_rates(exchange: Exchange) -> list[Rate]:
     logger.debug("Fetching rates from {:12s}", exchange.name)
 
     handlers = {
