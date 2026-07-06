@@ -34,9 +34,11 @@ class SubInfoItem(BaseModel):
 
     @field_validator("data_value2", "data_value3", mode="before")
     @classmethod
-    def parse_float(cls, value: str) -> float | None:
-        if value == "-":
+    def parse_float(cls, value: Any) -> float | None:
+        if value is None or value == "-":
             return None
+        if isinstance(value, bool):
+            raise ValueError("rate value must be numeric, not boolean")
         return float(value)
 
 
@@ -53,6 +55,26 @@ class SinopacRateResponse(BaseModel):
     @classmethod
     def parse_datetime(cls, value: str) -> datetime:
         return datetime.strptime(value, "%Y/%m/%d %H:%M:%S")
+
+
+def _build_sinopac_rate(item: SubInfoItem, exchange_type: Literal["cash", "remit"]) -> Rate:
+    match exchange_type:
+        case "remit":
+            return Rate(
+                exchange=Exchange.SINOPAC,
+                source=item.data_value4,
+                target="TWD",
+                spot_buy=item.data_value2,
+                spot_sell=item.data_value3,
+            )
+        case "cash":
+            return Rate(
+                exchange=Exchange.SINOPAC,
+                source=item.data_value4,
+                target="TWD",
+                cash_buy=item.data_value2,
+                cash_sell=item.data_value3,
+            )
 
 
 def merge_rates(*, remit_rates: list[Rate], cash_rates: list[Rate]) -> list[Rate]:
@@ -87,6 +109,9 @@ async def fetch_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "
 
     Returns a list of Rate objects with the exchange rates for various currencies.
     """
+    if exchange_type not in {"cash", "remit", "all"}:
+        raise ValueError(f"Invalid exchange type: {exchange_type}")
+
     if exchange_type == "all":
         remit_rates, cash_rates = await asyncio.gather(
             fetch_sinopac_rates("remit"),
@@ -113,20 +138,6 @@ async def fetch_sinopac_rates(exchange_type: Literal["cash", "remit", "all"] = "
 
         rates = []
         for item in data[0].sub_info:
-            rate = Rate(
-                exchange=Exchange.SINOPAC,
-                source=item.data_value4,
-                target="TWD",
-            )
-            match exchange_type:
-                case "remit":
-                    rate.spot_buy = item.data_value2
-                    rate.spot_sell = item.data_value3
-                case "cash":
-                    rate.cash_buy = item.data_value2
-                    rate.cash_sell = item.data_value3
-                case _:
-                    raise ValueError(f"Invalid exchange type: {exchange_type}")
-            rates.append(rate)
+            rates.append(_build_sinopac_rate(item, exchange_type))
 
         return rates

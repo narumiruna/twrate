@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 import httpx
 from pydantic import BaseModel
@@ -22,9 +23,11 @@ class RecDatum(BaseModel):
 
     @field_validator("tt_sell", "tt_buy", "cash_sell", "cash_buy", mode="before")
     @classmethod
-    def parse_float(cls, value: str | None) -> float | None:
+    def parse_float(cls, value: Any) -> float | None:
         if value is None:
             return None
+        if isinstance(value, bool):
+            raise ValueError("rate value must be numeric, not boolean")
         return float(value)
 
 

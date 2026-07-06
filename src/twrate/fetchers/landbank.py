@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import normalize_currency_code
 from ._ssl import create_bank_ssl_context
 
 _TIMEOUT = 30
@@ -35,7 +36,7 @@ def _parse_rate(value: str | None) -> float | None:
 def _extract_currency_code(value: str) -> str | None:
     normalized = re.sub(r"\s+", "", value)
     match = re.search(r"\(([A-Z]{3})\)", normalized)
-    return match.group(1) if match else None
+    return normalize_currency_code(match.group(1)) if match else None
 
 
 async def fetch_landbank_rates() -> list[Rate]:

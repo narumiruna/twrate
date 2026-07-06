@@ -1,10 +1,17 @@
+import math
+import re
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 
 from loguru import logger
 from pydantic import BaseModel
+from pydantic import ConfigDict
 from pydantic import Field
 from pydantic import field_validator
+
+_CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
+_MISSING_RATE_VALUES = {"", "-", "--", "—", "N/A", "NA", "NULL"}
 
 
 class Exchange(StrEnum):
@@ -31,6 +38,8 @@ class Exchange(StrEnum):
 
 
 class Rate(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
     exchange: Exchange
     source: str
     target: str
@@ -40,21 +49,50 @@ class Rate(BaseModel):
     cash_sell: float | None = None
     fetched_at: datetime = Field(default_factory=datetime.now)
 
+    @field_validator("source", "target", mode="before")
+    @classmethod
+    def normalize_currency_code(cls, value: Any) -> str:
+        if not isinstance(value, str):
+            raise ValueError("currency code must be a string")
+
+        code = value.strip().upper()
+        if not _CURRENCY_CODE_RE.fullmatch(code):
+            raise ValueError("currency code must be a 3-letter currency code")
+
+        return code
+
     @field_validator("spot_buy", "spot_sell", "cash_buy", "cash_sell", mode="before")
     @classmethod
-    def parse_float(cls, value: float | str | None) -> float | None:
+    def parse_float(cls, value: Any) -> float | None:
         if value is None:
             return None
 
-        if isinstance(value, float):
-            if value == 0:
-                return None
-            return value
+        if isinstance(value, bool):
+            raise ValueError("rate value must be numeric, not boolean")
 
-        value = float(value)
-        if value == 0:
+        if isinstance(value, int | float):
+            number = float(value)
+        elif isinstance(value, str):
+            normalized = value.replace(",", "").strip()
+            if normalized.upper() in _MISSING_RATE_VALUES:
+                return None
+            try:
+                number = float(normalized)
+            except ValueError as exc:
+                raise ValueError(f"invalid rate value: {value!r}") from exc
+        else:
+            raise ValueError(f"invalid rate value type: {type(value).__name__}")
+
+        if not math.isfinite(number):
+            raise ValueError("rate value must be finite")
+
+        if number < 0:
+            raise ValueError("rate value must not be negative")
+
+        if number == 0:
             return None
-        return value
+
+        return number
 
     @property
     def spot_mid(self) -> float | None:
@@ -80,10 +118,11 @@ class Rate(BaseModel):
             logger.info("[{}:{}] spot_buy or spot_sell is None", self.exchange, self.symbol)
             return None
 
-        if self.spot_mid is None:
+        mid = self.spot_mid
+        if mid is None or not math.isfinite(mid) or mid <= 0:
             return None
 
-        return (self.spot_sell - self.spot_buy) / self.spot_mid
+        return (self.spot_sell - self.spot_buy) / mid
 
     @property
     def cash_spread(self) -> float | None:
@@ -91,7 +130,8 @@ class Rate(BaseModel):
             logger.info("[{}:{}] cash_buy or cash_sell is None", self.exchange, self.symbol)
             return None
 
-        if self.cash_mid is None:
+        mid = self.cash_mid
+        if mid is None or not math.isfinite(mid) or mid <= 0:
             return None
 
-        return (self.cash_sell - self.cash_buy) / self.cash_mid
+        return (self.cash_sell - self.cash_buy) / mid

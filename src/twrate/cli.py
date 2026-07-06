@@ -88,11 +88,15 @@ def run(source_currency: str) -> None:
     Args:
         source_currency (str): The source currency to query rates for.
     """
+    normalized_source_currency = source_currency.strip().upper()
+    if not normalized_source_currency:
+        raise typer.BadParameter("source currency must not be empty")
+
     # Fetch rates using asyncio
     rates = asyncio.run(fetch_all_rates())
 
     # filter rates by source_currency
-    rates = [rate for rate in rates if rate.source == source_currency.upper()]
+    rates = [rate for rate in rates if rate.source == normalized_source_currency]
 
     # sort rates by spot_spread
     def sort_key(rate: Rate) -> float:
@@ -106,7 +110,7 @@ def run(source_currency: str) -> None:
     def _fmt_pct(value: float | None) -> str:
         return f"{value * 100:.2f}%" if value is not None else "-"
 
-    table = Table(title=f"{source_currency.upper()} 各行即時牌價")
+    table = Table(title=f"{normalized_source_currency} 各行即時牌價")
     table.add_column("銀行", justify="left")
     table.add_column("即期買進", justify="right")
     table.add_column("即期賣出", justify="right")

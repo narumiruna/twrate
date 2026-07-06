@@ -1,23 +1,33 @@
+from typing import Any
+
 import httpx
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
+from ._parsing import normalize_currency_code
+from ._parsing import optional_mapping
+from ._parsing import require_mapping
 
 _TIMEOUT = 30
 
 
-def _parse_rate(value: str | None) -> float | None:
+def _parse_rate(value: Any) -> float | None:
     """Parse a numeric rate value, treating missing values as ``None``."""
     if value is None:
         return None
 
-    value = value.strip()
-    if not value or value in {"-", "--"}:
+    if isinstance(value, bool):
         return None
+
+    if isinstance(value, str):
+        value = value.strip()
+        if not value or value in {"-", "--"}:
+            return None
 
     try:
         return float(value)
-    except ValueError:
+    except (TypeError, ValueError):
         return None
 
 
@@ -34,7 +44,7 @@ async def fetch_megabank_rates() -> list[Rate]:
         resp = await client.get(url, params=params)
         resp.raise_for_status()
 
-        payload = resp.json()
+        payload = require_mapping(resp.json(), "Unexpected response payload from Mega Bank")
 
         rates_data = payload.get("rates")
         if not isinstance(rates_data, list):
@@ -49,12 +59,12 @@ async def fetch_megabank_rates() -> list[Rate]:
             if not isinstance(curr_key, str):
                 continue
 
-            source = curr_key.split("|")[0].strip()
-            if not source:
+            source = normalize_currency_code(curr_key.split("|")[0])
+            if source is None:
                 continue
 
-            spot = item.get("spot") or {}
-            cash = item.get("cash") or {}
+            spot = optional_mapping(item.get("spot"))
+            cash = optional_mapping(item.get("cash"))
 
             rate = Rate(
                 exchange=Exchange.MEGABANK,
@@ -65,7 +75,7 @@ async def fetch_megabank_rates() -> list[Rate]:
                 cash_buy=_parse_rate(cash.get("bid")),
                 cash_sell=_parse_rate(cash.get("ask")),
             )
-            if rate.spot_buy is None and rate.spot_sell is None and rate.cash_buy is None and rate.cash_sell is None:
+            if not has_any_rate(rate):
                 continue
 
             rates.append(rate)

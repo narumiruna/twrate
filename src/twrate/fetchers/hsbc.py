@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
+from ._parsing import normalize_currency_code
 
 
 def parse_rate(value: str) -> float | None:
@@ -48,7 +50,9 @@ async def fetch_hsbc_rates() -> list[Rate]:
             # Format is typically "Currency Name (CODE)"
             currency_text = cols[0]
             match = re.search(r"\(([A-Z]{3})\)", currency_text)
-            currency_code = match.group(1) if match else currency_text.strip()
+            currency_code = normalize_currency_code(match.group(1) if match else currency_text)
+            if currency_code is None:
+                continue
 
             rate = Rate(
                 exchange=Exchange.HSBC,
@@ -59,6 +63,12 @@ async def fetch_hsbc_rates() -> list[Rate]:
                 cash_buy=parse_rate(cols[3]),
                 cash_sell=parse_rate(cols[4]),
             )
+            if not has_any_rate(rate):
+                continue
+
             rates.append(rate)
+
+        if not rates:
+            raise ValueError("No HSBC rates parsed from page")
 
         return rates

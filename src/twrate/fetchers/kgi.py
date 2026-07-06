@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
+from ._parsing import normalize_currency_code
 
 
 def _parse_rate(value: str) -> float | None:
@@ -42,14 +44,16 @@ async def fetch_kgi_rates() -> list[Rate]:
             if not code_tag:
                 continue
 
-            source = code_tag.get_text(strip=True).upper()
+            source = normalize_currency_code(code_tag.get_text(strip=True))
+            if source is None:
+                continue
 
             # Collect numeric values from the row while skipping textual labels
             values: list[str] = []
             for span in row.select(".kgibOtherCus004__item-val span"):
                 text = span.get_text(strip=True)
                 # Accept only numbers (with optional decimal) or dash
-                if re.fullmatch(r"-?|\d+(?:\.\d+)?", text):
+                if re.fullmatch(r"-|\d+(?:\.\d+)?", text):
                     values.append(text)
 
             if len(values) < 4:
@@ -61,17 +65,19 @@ async def fetch_kgi_rates() -> list[Rate]:
             cash_buy = _parse_rate(values[2])
             cash_sell = _parse_rate(values[3])
 
-            rates.append(
-                Rate(
-                    exchange=Exchange.KGI,
-                    source=source,
-                    target="TWD",
-                    spot_buy=spot_buy,
-                    spot_sell=spot_sell,
-                    cash_buy=cash_buy,
-                    cash_sell=cash_sell,
-                )
+            rate = Rate(
+                exchange=Exchange.KGI,
+                source=source,
+                target="TWD",
+                spot_buy=spot_buy,
+                spot_sell=spot_sell,
+                cash_buy=cash_buy,
+                cash_sell=cash_sell,
             )
+            if not has_any_rate(rate):
+                continue
+
+            rates.append(rate)
 
         if not rates:
             raise ValueError("No KGI rates parsed from page")
