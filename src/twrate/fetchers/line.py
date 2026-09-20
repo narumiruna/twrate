@@ -7,6 +7,8 @@ from bs4.element import Tag
 from twrate.types import Exchange
 from twrate.types import Rate
 
+from ._parsing import has_any_rate
+
 _HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -45,7 +47,7 @@ def parse_line_rate_table(html: str) -> list[Rate]:
                 "spot_sell": cells[2].get_text(separator=" ", strip=True),
             }
         )
-        if rate.spot_buy is None and rate.spot_sell is None:
+        if not has_any_rate(rate):
             continue
 
         rates.append(rate)

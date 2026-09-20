@@ -7,6 +7,7 @@ from bs4.element import Tag
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
 from ._ssl import create_bank_ssl_context
 
 _TIMEOUT = 30
@@ -95,20 +96,19 @@ def _extract_taishin_table_rates(table: Tag) -> list[Rate]:
         cash_buy = _parse_rate(cells[offset + 2].get_text(" ", strip=True))
         cash_sell = _parse_rate(cells[offset + 3].get_text(" ", strip=True))
 
-        if all(value is None for value in (spot_buy, spot_sell, cash_buy, cash_sell)):
+        rate = Rate(
+            exchange=Exchange.TAISHIN,
+            source=source,
+            target="TWD",
+            spot_buy=spot_buy,
+            spot_sell=spot_sell,
+            cash_buy=cash_buy,
+            cash_sell=cash_sell,
+        )
+        if not has_any_rate(rate):
             continue
 
-        rates.append(
-            Rate(
-                exchange=Exchange.TAISHIN,
-                source=source,
-                target="TWD",
-                spot_buy=spot_buy,
-                spot_sell=spot_sell,
-                cash_buy=cash_buy,
-                cash_sell=cash_sell,
-            )
-        )
+        rates.append(rate)
 
     return rates
 

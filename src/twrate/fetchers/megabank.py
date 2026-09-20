@@ -1,5 +1,3 @@
-from typing import Any
-
 import httpx
 
 from ..types import Exchange
@@ -7,28 +5,10 @@ from ..types import Rate
 from ._parsing import has_any_rate
 from ._parsing import normalize_currency_code
 from ._parsing import optional_mapping
+from ._parsing import parse_optional_rate as _parse_rate
 from ._parsing import require_mapping
 
 _TIMEOUT = 30
-
-
-def _parse_rate(value: Any) -> float | None:
-    """Parse a numeric rate value, treating missing values as ``None``."""
-    if value is None:
-        return None
-
-    if isinstance(value, bool):
-        return None
-
-    if isinstance(value, str):
-        value = value.strip()
-        if not value or value in {"-", "--"}:
-            return None
-
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 
 async def fetch_megabank_rates() -> list[Rate]:

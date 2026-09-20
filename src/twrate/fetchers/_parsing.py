@@ -1,18 +1,25 @@
-import re
 from collections.abc import Mapping
 from typing import Any
 
 from ..types import Rate
+from ..types import _normalize_currency_code
 
-_CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
+normalize_currency_code = _normalize_currency_code
 
 
-def normalize_currency_code(value: Any) -> str | None:
-    if not isinstance(value, str):
+def parse_optional_rate(value: Any) -> float | None:
+    if value is None or isinstance(value, bool):
         return None
 
-    code = value.strip().upper()
-    return code if _CURRENCY_CODE_RE.fullmatch(code) else None
+    if isinstance(value, str):
+        value = value.strip()
+        if not value:
+            return None
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def has_any_rate(rate: Rate) -> bool:

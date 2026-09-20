@@ -6,34 +6,9 @@ from ..types import Exchange
 from ..types import Rate
 from ._parsing import has_any_rate
 from ._parsing import normalize_currency_code
+from ._parsing import parse_optional_rate as parse_rate
 from ._parsing import require_mapping
 from ._ssl import create_bank_ssl_context
-
-
-def parse_rate(value: Any) -> float | None:
-    """Parse a rate value from string to float.
-
-    Args:
-        value: String representation of the rate
-
-    Returns:
-        Float value or None if parsing fails or value is empty/dash
-    """
-    if value is None:
-        return None
-
-    if isinstance(value, bool):
-        return None
-
-    if isinstance(value, str):
-        value = value.strip()
-        if not value or value == "-":
-            return None
-
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 
 def parse_nextbank_payload(data: Any) -> list[Rate]:

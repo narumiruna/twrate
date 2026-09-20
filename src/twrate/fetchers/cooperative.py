@@ -1,5 +1,3 @@
-from typing import Any
-
 import httpx
 from bs4 import BeautifulSoup
 
@@ -7,6 +5,7 @@ from ..types import Exchange
 from ..types import Rate
 from ._parsing import has_any_rate
 from ._parsing import normalize_currency_code
+from ._parsing import parse_optional_rate as _parse_rate
 from ._parsing import require_mapping
 from ._ssl import create_bank_ssl_context
 
@@ -17,24 +16,6 @@ _API_URL = "https://www.tcb-bank.com.tw/api/client/ForeignExchange/GetSpotForeig
 _HEADERS = {
     "X-Requested-With": "XMLHttpRequest",
 }
-
-
-def _parse_rate(value: Any) -> float | None:
-    if value is None:
-        return None
-
-    if isinstance(value, bool):
-        return None
-
-    if isinstance(value, str):
-        value = value.strip()
-        if not value or value == "-":
-            return None
-
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 
 def _extract_token(html: str) -> str:

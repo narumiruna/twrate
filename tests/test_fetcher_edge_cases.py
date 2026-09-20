@@ -91,17 +91,24 @@ def test_esun_rate_model_treats_missing_spot_rates_as_none() -> None:
     "parse_rate",
     [parse_cooperative_rate, parse_fubon_rate, parse_megabank_rate, parse_nextbank_rate, parse_taichung_rate],
 )
-def test_json_rate_parsers_accept_numeric_values(parse_rate) -> None:
-    assert parse_rate(cast(Any, 31.25)) == 31.25
-
-
 @pytest.mark.parametrize(
-    "parse_rate",
-    [parse_cooperative_rate, parse_fubon_rate, parse_megabank_rate, parse_nextbank_rate, parse_taichung_rate],
+    ("value", "expected"),
+    [
+        (None, None),
+        (True, None),
+        (31, 31.0),
+        (31.25, 31.25),
+        ("", None),
+        ("   ", None),
+        ("-", None),
+        ("--", None),
+        (" 31.25 ", 31.25),
+        ("invalid", None),
+        ([], None),
+    ],
 )
-def test_json_rate_parsers_reject_boolean_and_malformed_values(parse_rate) -> None:
-    assert parse_rate(cast(Any, True)) is None
-    assert parse_rate(cast(Any, [])) is None
+def test_json_rate_parsers_normalize_external_values(parse_rate, value: Any, expected: float | None) -> None:
+    assert parse_rate(value) == expected
 
 
 def test_nextbank_parser_rejects_boolean_rate_values() -> None:
@@ -113,9 +120,7 @@ def test_nextbank_parser_rejects_boolean_rate_values() -> None:
 
 def test_dbs_rate_model_rejects_boolean_rate_values() -> None:
     with pytest.raises(ValidationError):
-        RecDatum.model_validate(
-            {"currency": "USD", "ttSell": True, "ttBuy": "31.0", "cashSell": None, "cashBuy": None}
-        )
+        RecDatum.model_validate({"currency": "USD", "ttSell": True, "ttBuy": "31.0", "cashSell": None, "cashBuy": None})
 
 
 def test_esun_rate_model_rejects_boolean_rate_values() -> None:

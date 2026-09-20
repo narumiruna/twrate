@@ -28,9 +28,15 @@ def test_rate_normalizes_currency_codes_and_common_missing_rate_values() -> None
     assert rate.cash_sell is None
 
 
-@pytest.mark.parametrize("source", ["", "US", "US Dollar", "US1", 123])
-def test_rate_rejects_invalid_currency_code(source: object) -> None:
-    with pytest.raises(ValidationError, match="currency code"):
+@pytest.mark.parametrize("source", ["", "US", "US Dollar", "US1"])
+def test_rate_rejects_malformed_currency_code(source: object) -> None:
+    with pytest.raises(ValidationError, match="currency code must be a 3-letter currency code"):
+        Rate.model_validate({"exchange": Exchange.BOT, "source": source, "target": "TWD", "spot_buy": "1.0"})
+
+
+@pytest.mark.parametrize("source", [None, 123])
+def test_rate_rejects_non_string_currency_code(source: object) -> None:
+    with pytest.raises(ValidationError, match="currency code must be a string"):
         Rate.model_validate({"exchange": Exchange.BOT, "source": source, "target": "TWD", "spot_buy": "1.0"})
 
 

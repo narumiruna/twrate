@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
 from ._parsing import normalize_currency_code
 
 _TIMEOUT = 30
@@ -77,20 +78,19 @@ async def fetch_firstbank_rates() -> list[Rate]:  # noqa: C901
 
     rates: list[Rate] = []
     for source, raw in values.items():
-        if all(value is None for value in raw.values()):
+        rate = Rate(
+            exchange=Exchange.FIRSTBANK,
+            source=source,
+            target="TWD",
+            spot_buy=raw["spot_buy"],
+            spot_sell=raw["spot_sell"],
+            cash_buy=raw["cash_buy"],
+            cash_sell=raw["cash_sell"],
+        )
+        if not has_any_rate(rate):
             continue
 
-        rates.append(
-            Rate(
-                exchange=Exchange.FIRSTBANK,
-                source=source,
-                target="TWD",
-                spot_buy=raw["spot_buy"],
-                spot_sell=raw["spot_sell"],
-                cash_buy=raw["cash_buy"],
-                cash_sell=raw["cash_sell"],
-            )
-        )
+        rates.append(rate)
 
     if not rates:
         raise ValueError("No First Bank rates with numeric values parsed")
