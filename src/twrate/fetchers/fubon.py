@@ -1,11 +1,10 @@
-from typing import Any
-
 import httpx
 
 from ..types import Exchange
 from ..types import Rate
 from ._parsing import has_any_rate
 from ._parsing import normalize_currency_code
+from ._parsing import parse_optional_rate as _parse_rate
 from ._parsing import require_mapping
 from ._ssl import create_bank_ssl_context
 
@@ -18,24 +17,6 @@ _HEADERS = {
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     ),
 }
-
-
-def _parse_rate(value: Any) -> float | None:
-    if value is None:
-        return None
-
-    if isinstance(value, bool):
-        return None
-
-    if isinstance(value, str):
-        value = value.strip()
-        if not value or value == "-":
-            return None
-
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 
 async def fetch_fubon_rates() -> list[Rate]:

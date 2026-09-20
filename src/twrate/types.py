@@ -14,6 +14,14 @@ _CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
 _MISSING_RATE_VALUES = {"", "-", "--", "—", "N/A", "NA", "NULL"}
 
 
+def _normalize_currency_code(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+
+    code = value.strip().upper()
+    return code if _CURRENCY_CODE_RE.fullmatch(code) else None
+
+
 class Exchange(StrEnum):
     DBS = "DBS_BANK"
     SINOPAC = "BANK_SINOPAC"
@@ -55,8 +63,8 @@ class Rate(BaseModel):
         if not isinstance(value, str):
             raise ValueError("currency code must be a string")
 
-        code = value.strip().upper()
-        if not _CURRENCY_CODE_RE.fullmatch(code):
+        code = _normalize_currency_code(value)
+        if code is None:
             raise ValueError("currency code must be a 3-letter currency code")
 
         return code

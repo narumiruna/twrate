@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from ..types import Exchange
 from ..types import Rate
+from ._parsing import has_any_rate
 from ._parsing import normalize_currency_code
 from ._ssl import create_bank_ssl_context
 
@@ -72,20 +73,19 @@ async def fetch_landbank_rates() -> list[Rate]:
         cash_buy = _parse_rate(cols[3])
         cash_sell = _parse_rate(cols[4])
 
-        if all(value is None for value in (spot_buy, spot_sell, cash_buy, cash_sell)):
+        rate = Rate(
+            exchange=Exchange.LANDBANK,
+            source=source,
+            target="TWD",
+            spot_buy=spot_buy,
+            spot_sell=spot_sell,
+            cash_buy=cash_buy,
+            cash_sell=cash_sell,
+        )
+        if not has_any_rate(rate):
             continue
 
-        rates.append(
-            Rate(
-                exchange=Exchange.LANDBANK,
-                source=source,
-                target="TWD",
-                spot_buy=spot_buy,
-                spot_sell=spot_sell,
-                cash_buy=cash_buy,
-                cash_sell=cash_sell,
-            )
-        )
+        rates.append(rate)
 
     if not rates:
         raise ValueError("No Land Bank rates parsed from page")

@@ -1,5 +1,3 @@
-from typing import Any
-
 import httpx
 
 from ..types import Exchange
@@ -7,6 +5,7 @@ from ..types import Rate
 from ._parsing import has_any_rate
 from ._parsing import normalize_currency_code
 from ._parsing import optional_mapping
+from ._parsing import parse_optional_rate as _parse_rate
 from ._parsing import require_mapping
 
 _TIMEOUT = 30
@@ -26,21 +25,6 @@ _CURRENCIES = (
     "AUD",
     "SEK",
 )
-
-
-def _parse_rate(value: Any) -> float | None:
-    if value is None or isinstance(value, bool):
-        return None
-
-    if isinstance(value, str):
-        value = value.strip()
-        if not value:
-            return None
-
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 
 async def fetch_taichung_rates() -> list[Rate]:
